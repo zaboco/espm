@@ -4,7 +4,10 @@
   "description": "ES Package Manager",
   "main": "index.js",
   "scripts": {},
-  "keywords": ["ES", ""],
+  "keywords": [],
   "author": "zaboco@gmail.com",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "2.5.1"
+  }
 }
