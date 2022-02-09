@@ -11,6 +11,21 @@ const safeFs = {
       T.map(() => filePath),
     );
   },
+  rm(filePath: string): Task<string, string> {
+    return pipe(
+      T.fromPromise(() => fs.rm(filePath), String),
+      T.map(() => filePath),
+    );
+  },
+  rmdir(dirPath: string): Task<string, string> {
+    return pipe(
+      T.fromPromise(
+        () => fs.rm(dirPath, { recursive: true, force: true }),
+        String,
+      ),
+      T.map(() => dirPath),
+    );
+  },
   mkdir(path: string): Task<string, string> {
     return pipe(
       T.fromPromise(() => fs.mkdir(path, { recursive: true }), String),
@@ -38,6 +53,17 @@ export const filesManager = {
           console.log('[INFO] Wrote types file:', fileName);
         }),
       ),
+
+  removeTypes: (packageId: string) =>
+    pipe(
+      packageId,
+      extractPackageName,
+      T.map(SX.prepend(`${MODULES_DIRECTORY_NAME}/`)),
+      T.flatMap(safeFs.rmdir),
+      T.tap((dirName) => {
+        console.log('[INFO] Removed directory:', dirName);
+      }),
+    ),
 };
 
 function extractPackageName(packageId: string): Task<string, string> {

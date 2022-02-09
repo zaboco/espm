@@ -1,14 +1,10 @@
 #!/usr/bin/env node
 
-import { T, Task } from '#lib/ts-belt-extra';
+import { GX, T, Task } from '#lib/ts-belt-extra';
 import { A, pipe, R, Result } from '@mobily/ts-belt';
 import { filesManager } from './cli/filesManager';
 import { registryClient } from './cli/registryClient';
-
-interface Command {
-  action: 'add';
-  packageIds: readonly string[];
-}
+import { Command } from './types';
 
 main(process.argv.slice(2));
 
@@ -32,8 +28,9 @@ function main(programArgs: ReadonlyArray<string>) {
 function parseCommandArgs(
   args: ReadonlyArray<string>,
 ): Result<Command, string> {
-  if (A.at(args, 0) !== 'add') {
-    return R.Error(`Command not supported: "${A.at(args, 0)}"`);
+  const action = A.at(args, 0);
+  if (!GX.isOneOf(action, ['add', 'remove'] as const)) {
+    return R.Error(`Command not supported: "${action}"`);
   }
 
   const packageIds = A.drop(args, 1);
@@ -42,7 +39,7 @@ function parseCommandArgs(
   }
 
   return R.Ok({
-    action: 'add',
+    action: action,
     packageIds: packageIds,
   });
 }
@@ -56,6 +53,14 @@ function runCommand(command: Command): Task<unknown, string> {
       T.mapError(A.join(', ')),
     );
   }
+  if (command.action === 'remove') {
+    return pipe(
+      command.packageIds,
+      A.map(removePackageTypes),
+      T.all,
+      T.mapError(A.join(', ')),
+    );
+  }
   return T.of(undefined);
 }
 
@@ -64,4 +69,8 @@ function addPackageTypes(packageId: string): Task<string, string> {
     registryClient.fetchTypesSource(packageId),
     T.flatMap(filesManager.storeTypes(packageId)),
   );
+}
+
+function removePackageTypes(packageId: string): Task<string, string> {
+  return filesManager.removeTypes(packageId);
 }
