@@ -32,6 +32,8 @@ export const registryClient = {
       T.map(O.map(AX.ensureArray)),
       T.map(O.flatMap(A.head)),
       T.flatMap(T.fromOption(`Types not available for ${packageId}`)),
+      T.flatMap((typesUrl) => httpClient.get<string>(typesUrl)),
+      T.map(D.getUnsafe('data')),
     );
   },
 };

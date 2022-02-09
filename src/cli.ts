@@ -2,6 +2,7 @@
 
 import { T, Task } from '#lib/ts-belt-extra';
 import { A, pipe, R, Result } from '@mobily/ts-belt';
+import { filesManager } from './cli/filesManager';
 import { registryClient } from './cli/registryClient';
 
 interface Command {
@@ -46,18 +47,16 @@ function parseCommandArgs(
   });
 }
 
-function runCommand(command: Command): Task<void, string> {
+function runCommand(command: Command): Task<unknown, string> {
   if (command.action === 'add') {
     return addTypes(command.packageId);
   }
   return T.of(undefined);
 }
 
-function addTypes(packageId: string): Task<void, string> {
+function addTypes(packageId: string): Task<string, string> {
   return pipe(
     registryClient.fetchTypesSource(packageId),
-    T.map((typesSource) => {
-      console.log('types', typesSource.slice(0, 100), '...');
-    }),
+    T.flatMap(filesManager.storeTypes(packageId)),
   );
 }

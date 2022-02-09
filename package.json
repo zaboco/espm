@@ -11,7 +11,7 @@
     "@types/node": "16.11.22",
     "esbuild-runner": "2.2.1",
     "prettier": "2.5.1",
-    "ts-eager": "2.0.2"
+    "typescript": "4.5.5"
   },
   "dependencies": {
     "@mobily/ts-belt": "3.9.0",

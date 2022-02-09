@@ -37,6 +37,12 @@ export const map =
       task.fork(rej, flow(fn, res));
     });
 
+export const tap = <R, E>(fn: (r: R) => void) =>
+  map<R, R, E>((r) => {
+    fn(r);
+    return r;
+  });
+
 export const fromPromise = <R, E>(
   thunk: () => Promise<R>,
   errorMapper: (err: any) => E,
