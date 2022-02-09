@@ -79,19 +79,29 @@ export const sequence = <R, E>(
 
 export const all = <R, E>(
   tasks: readonly Task<NonNullable<R>, NonNullable<E>>[],
-): Task<void, never> => {
-  return make((_rej, res) => {
+): Task<void, E[]> => {
+  return make((rej, res) => {
     let resolvedCount = 0;
+    const errors: E[] = [];
 
     const tryToResolve = () => {
       resolvedCount++;
-      if (resolvedCount === tasks.length) {
-        res();
+      if (resolvedCount !== tasks.length) {
+        return;
       }
+
+      if (errors.length === tasks.length) {
+        rej(errors);
+      }
+
+      res();
     };
 
-    A.forEach(tasks, (task) => {
-      task.fork(tryToResolve, tryToResolve);
+    A.forEachWithIndex(tasks, (index, task) => {
+      task.fork((e) => {
+        errors[index] = e;
+        tryToResolve();
+      }, tryToResolve);
     });
   });
 };
