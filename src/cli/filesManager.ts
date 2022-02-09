@@ -1,38 +1,8 @@
+import { safeFs } from '#lib/safe-fs';
 import { SX, T, Task } from '#lib/ts-belt-extra';
 import { A, O, pipe, S } from '@mobily/ts-belt';
-import * as fs from 'node:fs/promises';
 
 const MODULES_DIRECTORY_NAME = 'es-modules';
-
-const safeFs = {
-  writeFile(filePath: string, fileContents: string): Task<string, string> {
-    return pipe(
-      T.fromPromise(() => fs.writeFile(filePath, fileContents), String),
-      T.map(() => filePath),
-    );
-  },
-  rm(filePath: string): Task<string, string> {
-    return pipe(
-      T.fromPromise(() => fs.rm(filePath), String),
-      T.map(() => filePath),
-    );
-  },
-  rmdir(dirPath: string): Task<string, string> {
-    return pipe(
-      T.fromPromise(
-        () => fs.rm(dirPath, { recursive: true, force: true }),
-        String,
-      ),
-      T.map(() => dirPath),
-    );
-  },
-  mkdir(path: string): Task<string, string> {
-    return pipe(
-      T.fromPromise(() => fs.mkdir(path, { recursive: true }), String),
-      T.map(() => path),
-    );
-  },
-};
 
 export const filesManager = {
   storeTypes:
