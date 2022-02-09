@@ -45,7 +45,7 @@ function extractPackageName(packageId: string): Task<string, string> {
   return pipe(
     packageId,
     S.match(packageIdRegex),
-    O.flatMap(A.head),
+    O.flatMap(A.at(1)),
     T.fromOption(`Package id is invalid: ${packageId}`),
   );
 }
