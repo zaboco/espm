@@ -1,4 +1,4 @@
-import { A, flow, O, Option, pipe, R, Result } from '@mobily/ts-belt';
+import { A, flow, O, Option, pipe, R as Res, Result } from '@mobily/ts-belt';
 
 export type Task<R, E> = { fork: Fork<R, E> };
 type Fork<R, E> = (rej: (e: E) => void, res: (r: R) => void) => void;
@@ -53,7 +53,7 @@ export const fromPromise = <R, E>(
 
 export const fromResult = <TR, TE>(result: Result<TR, TE>): Task<TR, TE> =>
   make((rej, res) => {
-    R.match(result, res, rej);
+    Res.match(result, res, rej);
   });
 
 export const fromOption =
@@ -74,5 +74,24 @@ export const sequence = <R, E>(
         ),
       ),
     );
+  });
+};
+
+export const all = <R, E>(
+  tasks: readonly Task<NonNullable<R>, NonNullable<E>>[],
+): Task<void, never> => {
+  return make((_rej, res) => {
+    let resolvedCount = 0;
+
+    const tryToResolve = () => {
+      resolvedCount++;
+      if (resolvedCount === tasks.length) {
+        res();
+      }
+    };
+
+    A.forEach(tasks, (task) => {
+      task.fork(tryToResolve, tryToResolve);
+    });
   });
 };
