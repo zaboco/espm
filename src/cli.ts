@@ -7,7 +7,7 @@ import { registryClient } from './cli/registryClient';
 
 interface Command {
   action: 'add';
-  packageId: string;
+  packageIds: readonly string[];
 }
 
 main(process.argv.slice(2));
@@ -36,25 +36,25 @@ function parseCommandArgs(
     return R.Error(`Command not supported: "${A.at(args, 0)}"`);
   }
 
-  const packageId = A.at(args, 1);
-  if (!packageId) {
-    return R.Error(`Package not given! Usage: TODO`);
+  const packageIds = A.drop(args, 1);
+  if (packageIds.length === 0) {
+    return R.Error(`No package given! Usage: TODO`);
   }
 
   return R.Ok({
     action: 'add',
-    packageId: packageId,
+    packageIds: packageIds,
   });
 }
 
 function runCommand(command: Command): Task<unknown, string> {
   if (command.action === 'add') {
-    return addTypes(command.packageId);
+    return pipe(command.packageIds, A.map(addPackageTypes), T.sequence);
   }
   return T.of(undefined);
 }
 
-function addTypes(packageId: string): Task<string, string> {
+function addPackageTypes(packageId: string): Task<string, string> {
   return pipe(
     registryClient.fetchTypesSource(packageId),
     T.flatMap(filesManager.storeTypes(packageId)),

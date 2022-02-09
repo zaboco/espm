@@ -1,4 +1,4 @@
-import { flow, O, Option, pipe, R, Result } from '@mobily/ts-belt';
+import { A, flow, O, Option, pipe, R, Result } from '@mobily/ts-belt';
 
 export type Task<R, E> = { fork: Fork<R, E> };
 type Fork<R, E> = (rej: (e: E) => void, res: (r: R) => void) => void;
@@ -22,8 +22,8 @@ export const rejected = <E>(e: E): Task<never, E> =>
   });
 
 export const flatMap =
-  <R1, R2, E>(fn: (r: R1) => Task<R2, E>) =>
-  (task: Task<R1, E>): Task<R2, E> =>
+  <R, O, E>(fn: (r: R) => Task<O, E>) =>
+  (task: Task<R, E>): Task<O, E> =>
     make((rej, res) => {
       task.fork(rej, (r) => {
         fn(r).fork(rej, res);
@@ -31,8 +31,8 @@ export const flatMap =
     });
 
 export const map =
-  <R1, R2, E>(fn: (r: R1) => R2) =>
-  (task: Task<R1, E>): Task<R2, E> =>
+  <R, O, _E>(fn: (r: R) => O) =>
+  (task: Task<R, _E>): Task<O, _E> =>
     make((rej, res) => {
       task.fork(rej, flow(fn, res));
     });
@@ -60,3 +60,19 @@ export const fromOption =
   <R, E>(errorValue: NonNullable<E>) =>
   (option: Option<R>): Task<R, E> =>
     pipe(option, O.toResult(errorValue), fromResult);
+
+export const sequence = <R, E>(
+  tasks: readonly Task<R, E>[],
+): Task<readonly R[], E> => {
+  return A.reduce(tasks, of<readonly R[], E>([]), (acc, task) => {
+    return pipe(
+      acc,
+      flatMap((a) =>
+        pipe(
+          task,
+          map((r) => A.prepend(a, r)),
+        ),
+      ),
+    );
+  });
+};
