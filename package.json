@@ -9,6 +9,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "16.11.22",
+    "esbuild-runner": "2.2.1",
     "prettier": "2.5.1",
     "ts-eager": "2.0.2"
   },
