@@ -37,6 +37,13 @@ export const map =
       task.fork(rej, flow(fn, res));
     });
 
+export const mapError =
+  <_R, E, F>(fn: (r: E) => F) =>
+  (task: Task<_R, E>): Task<_R, F> =>
+    make((rej, res) => {
+      task.fork(flow(fn, rej), res);
+    });
+
 export const tap = <R, E>(fn: (r: R) => void) =>
   map<R, R, E>((r) => {
     fn(r);

@@ -22,5 +22,6 @@
     "paths": {
       "#lib/*": ["packages/*"]
     }
-  }
+  },
+  "exclude": ["examples", "node_modules"]
 }

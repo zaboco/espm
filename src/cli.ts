@@ -49,7 +49,12 @@ function parseCommandArgs(
 
 function runCommand(command: Command): Task<unknown, string> {
   if (command.action === 'add') {
-    return pipe(command.packageIds, A.map(addPackageTypes), T.all);
+    return pipe(
+      command.packageIds,
+      A.map(addPackageTypes),
+      T.all,
+      T.mapError(A.join(', ')),
+    );
   }
   return T.of(undefined);
 }
