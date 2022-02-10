@@ -1,6 +1,7 @@
 {
   "private": true,
   "devDependencies": {
+    "@vitejs/plugin-react": "1.2.0",
     "typescript": "4.5.5",
     "vite": "2.7.13"
   }

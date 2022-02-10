@@ -5,7 +5,7 @@
     "module": "ESNext",
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "jsx": "react-jsx",
+    "jsx": "react",
     "strict": true,
     "strictNullChecks": true,
     "noUncheckedIndexedAccess": true,

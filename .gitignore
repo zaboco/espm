@@ -1,3 +1,4 @@
 node_modules/
 es-modules/
 tsconfig.tsbuildinfo
+dist/
