@@ -1,25 +1,53 @@
-import { httpClient, HttpClientError, HttpTask } from '#lib/safe-http-client';
+import { httpClient } from '#lib/safe-http-client';
 import { AX, T, Task } from '#lib/ts-belt-extra';
-import { A, D, O, pipe } from '@mobily/ts-belt';
+import { A, D, flow, O, pipe } from '@mobily/ts-belt';
+import { HttpieResponse } from 'httpie';
+import { extractPackageIdFromIndexSource } from 'src/lib/packages';
+import { GivenPackageId, Package, Text } from 'src/types';
 
 const TYPES_URL_HEADER = 'x-typescript-types';
 
-export const registryClient = {
-  fetchPackage(packageId: string): HttpTask<string> {
-    const packageURL = `https://esm.sh/${packageId}?bundle`;
-    return httpClient.get<string>(packageURL);
-  },
+function buildPackageUrl(givenPackageId: GivenPackageId) {
+  return `https://esm.sh/${givenPackageId}?bundle`;
+}
 
-  fetchTypesSource(packageId: string): Task<string, HttpClientError> {
-    return pipe(
-      registryClient.fetchPackage(packageId),
-      T.map((r) => r.headers),
-      T.map(D.getUnsafe(TYPES_URL_HEADER)),
-      T.map(O.map(AX.ensureArray)),
-      T.map(O.flatMap(A.head)),
-      T.flatMap(T.fromOption(`Types not available for ${packageId}`)),
-      T.flatMap((typesUrl) => httpClient.get<string>(typesUrl)),
-      T.map(D.getUnsafe('data')),
+export const registryClient = {
+  fetchPackage(givenPackageId: GivenPackageId): Task<Package, string> {
+    const packageURL = buildPackageUrl(givenPackageId);
+    const responseTask = httpClient.get<Text>(packageURL);
+    const packageIdTask = pipe(
+      responseTask,
+      T.flatMap(getData(`Package index file missing: ${givenPackageId}`)),
+      T.flatMap(flow(extractPackageIdFromIndexSource, T.fromResult)),
     );
+
+    const typesTextTask = pipe(
+      responseTask,
+      T.flatMap(getHeader(TYPES_URL_HEADER)),
+      T.flatMap((typesUrl) => httpClient.get<Text>(typesUrl)),
+      T.flatMap(getData(`Package types file missing: ${givenPackageId}`)),
+    );
+
+    return T.zipWith(packageIdTask, typesTextTask, (packageId, typesText) => ({
+      id: packageId,
+      typesText,
+    }));
   },
 };
+
+const getData =
+  <R, E>(errorValue: NonNullable<E>) =>
+  (response: HttpieResponse<R>): Task<R, E> =>
+    pipe(response, D.get('data'), T.fromOption(errorValue));
+
+const getHeader =
+  (header: string) =>
+  (response: HttpieResponse): Task<string, string> =>
+    pipe(
+      response,
+      D.getUnsafe('headers'),
+      D.getUnsafe(header),
+      O.map(AX.ensureArray),
+      O.flatMap(A.head),
+      T.fromOption(`Header ${header} not found`),
+    );

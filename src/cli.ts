@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
 import { GX, T, Task } from '#lib/ts-belt-extra';
-import { A, pipe, R, Result } from '@mobily/ts-belt';
+import { A, D, flow, pipe, R, Result } from '@mobily/ts-belt';
+import { buildManifest } from 'src/lib/manifest';
+import { packageDescriptorFromId } from 'src/lib/packages';
 import { filesManager } from './cli/filesManager';
 import { registryClient } from './cli/registryClient';
-import { Command } from './types';
+import { Command, PackageId, GivenPackageId } from './types';
 
 main(process.argv.slice(2));
 
@@ -46,31 +48,66 @@ function parseCommandArgs(
 
 function runCommand(command: Command): Task<unknown, string> {
   if (command.action === 'add') {
-    return pipe(
-      command.packageIds,
-      A.map(addPackageTypes),
-      T.all,
-      T.mapError(A.join(', ')),
-    );
+    return addCommand(command.packageIds);
   }
   if (command.action === 'remove') {
-    return pipe(
-      command.packageIds,
-      A.map(removePackageTypes),
-      T.all,
-      T.mapError(A.join(', ')),
-    );
+    return pipe(command.packageIds, A.map(removePackageTypes), T.all);
   }
   return T.of(undefined);
 }
 
-function addPackageTypes(packageId: string): Task<string, string> {
+function addCommand(
+  packageIds: readonly GivenPackageId[],
+): Task<string, string> {
+  const fetchPackagesTask = pipe(
+    packageIds,
+    A.map(registryClient.fetchPackage),
+    T.all,
+  );
+
+  const writeTypesTask = pipe(
+    fetchPackagesTask,
+    T.flatMap(flow(A.map(filesManager.storeTypes), T.all)),
+  );
+
+  const writeManifestTask = pipe(
+    fetchPackagesTask,
+    T.map(A.map(D.getUnsafe('id'))),
+    T.flatMap(writeManifest),
+  );
+
   return pipe(
-    registryClient.fetchTypesSource(packageId),
-    T.flatMap(filesManager.storeTypes(packageId)),
+    writeTypesTask,
+    T.flatMap(() => writeManifestTask),
   );
 }
 
-function removePackageTypes(packageId: string): Task<string, string> {
+function writeManifest(packageIds: readonly PackageId[]): Task<string, string> {
+  return pipe(
+    packageIds,
+    A.map(packageDescriptorFromId),
+    combineResults,
+    R.map(buildManifest),
+    T.fromResult,
+    T.flatMap(filesManager.writeManifest),
+  );
+}
+
+function removePackageTypes(packageId: GivenPackageId): Task<string, string> {
   return filesManager.removeTypes(packageId);
+}
+
+function combineResults<$R, $E>(
+  results: readonly Result<$R, $E>[],
+): Result<readonly $R[], $E> {
+  return pipe(
+    results,
+    A.reduce(resultOf<readonly $R[], $E>([]), (acc, result) =>
+      R.flatMap(acc, (a) => R.map(result, (r) => A.prepend(a, r))),
+    ),
+  );
+}
+
+function resultOf<$R, $E>(r: NonNullable<$R>): Result<$R, $E> {
+  return R.Ok(r);
 }

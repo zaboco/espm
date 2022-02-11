@@ -37,6 +37,21 @@ export const map =
       task.fork(rej, flow(fn, res));
     });
 
+export const zipWith = <R1, R2, O, _E>(
+  t1: Task<R1, _E>,
+  t2: Task<R2, _E>,
+  fn: (r1: R1, r2: R2) => O,
+): Task<O, _E> =>
+  pipe(
+    t1,
+    flatMap((r1) =>
+      pipe(
+        t2,
+        map((r2) => fn(r1, r2)),
+      ),
+    ),
+  );
+
 export const mapError =
   <_R, E, F>(fn: (r: E) => F) =>
   (task: Task<_R, E>): Task<_R, F> =>
@@ -86,29 +101,40 @@ export const sequence = <R, E>(
 
 export const all = <R, E>(
   tasks: readonly Task<NonNullable<R>, NonNullable<E>>[],
-): Task<void, E[]> => {
+): Task<R[], E> => {
   return make((rej, res) => {
-    let resolvedCount = 0;
-    const errors: E[] = [];
+    let settledCount = 0;
+    const resolved: R[] = [];
+    let wasRejected = false;
 
-    const tryToResolve = () => {
-      resolvedCount++;
-      if (resolvedCount !== tasks.length) {
+    const tryToSettle = () => {
+      settledCount++;
+      if (settledCount !== tasks.length) {
         return;
       }
-
-      if (errors.length === tasks.length) {
-        rej(errors);
-      }
-
-      res();
+      res(resolved);
     };
 
     A.forEachWithIndex(tasks, (index, task) => {
-      task.fork((e) => {
-        errors[index] = e;
-        tryToResolve();
-      }, tryToResolve);
+      if (wasRejected) {
+        return;
+      }
+      task.fork(
+        (e) => {
+          if (wasRejected) {
+            return;
+          }
+          wasRejected = true;
+          rej(e);
+        },
+        (r) => {
+          if (wasRejected) {
+            return;
+          }
+          resolved[index] = r;
+          tryToSettle();
+        },
+      );
     });
   });
 };
