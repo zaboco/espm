@@ -1,3 +1,5 @@
+import { factory, Id } from '#lib/ts-belt-extra/Id';
+
 export type Command = AddCommand | RemoveCommand;
 
 export interface AddCommand {
@@ -12,14 +14,16 @@ export interface RemoveCommand {
 
 export interface Package {
   id: PackageId;
-  typesText: Text;
+  typesText: CodeText;
 }
 
 export interface PackageWithSource extends Package {
-  sourceText: Text;
+  sourceText: CodeText;
 }
 
-export type Text = string & {};
+export type CodeText = Id<'CodeText', string>;
+
+export const CodeText = factory<'CodeText', string>('CodeText');
 
 export type GivenPackageId = PackageName | PackageId;
 export type PackageId = `${PackageName}@${PackageVersion}`;

@@ -4,7 +4,7 @@ import {
   PackageDescriptor,
   PackageName,
   GivenPackageId,
-  Text,
+  CodeText,
 } from 'src/types';
 
 export function packageNameFromId(
@@ -24,12 +24,13 @@ export function packageNameFromId(
  *
  */
 export function extractPackageIdFromIndexSource(
-  packageIndexSource: Text,
+  packageIndexSource: CodeText,
 ): Result<PackageId, string> {
   const esmHeaderRegex = /^\/\* esm.sh - (.+) \*\/$/;
 
   return pipe(
     packageIndexSource,
+    CodeText.unwrap,
     S.split('\n'),
     A.head,
     O.flatMap(S.match(esmHeaderRegex)),

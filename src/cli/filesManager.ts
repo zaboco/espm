@@ -2,7 +2,7 @@ import { safeFs } from '#lib/safe-fs';
 import { SX, T, Task } from '#lib/ts-belt-extra';
 import { pipe, R } from '@mobily/ts-belt';
 import { packageNameFromId } from 'src/lib/packages';
-import { Manifest, GivenPackageId, Package } from 'src/types';
+import { Manifest, GivenPackageId, Package, CodeText } from 'src/types';
 
 const MODULES_DIRECTORY_NAME = 'es-modules';
 const MANIFEST_FILE_NAME = 'es-modules.json';
@@ -19,7 +19,10 @@ export const filesManager = {
         console.log('[INFO] Created directory:', dirName);
       }),
       T.flatMap((dirName) =>
-        safeFs.writeFile(`${dirName}/index.d.ts`, pkg.typesText),
+        safeFs.writeFile(
+          `${dirName}/index.d.ts`,
+          CodeText.unwrap(pkg.typesText),
+        ),
       ),
       T.tap((fileName) => {
         console.log('[INFO] Wrote types file:', fileName);
