@@ -1,7 +1,7 @@
 const path = require('path');
 
 const config = {
-  entry: './src/index.jsx',
+  entry: './src/index.tsx',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
@@ -11,11 +11,6 @@ const config = {
   },
   module: {
     rules: [
-      {
-        test: /\.(js|jsx)$/,
-        use: 'babel-loader',
-        exclude: /node_modules/,
-      },
       {
         test: /\.tsx?$/,
         loader: 'ts-loader',
