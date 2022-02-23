@@ -3,4 +3,5 @@ es-modules/
 tsconfig.tsbuildinfo
 dist/
 out/
+.cache
 /es-modules.json

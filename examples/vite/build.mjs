@@ -1,4 +1,5 @@
 import esbuild from 'esbuild';
+import { cache } from 'esbuild-plugin-cache';
 
 function externalAliasPlugin(mapping) {
   const importNames = Object.keys(mapping);
@@ -13,15 +14,23 @@ function externalAliasPlugin(mapping) {
   };
 }
 
+const importmap = {
+  imports: {
+    react: 'https://esm.sh/react@17.0.2',
+    'react-dom': 'https://esm.sh/react-dom@17.0.2',
+  },
+};
+
 esbuild.build({
   entryPoints: ['src/index.tsx'],
   bundle: true,
   format: 'esm',
   outdir: 'out',
   plugins: [
-    externalAliasPlugin({
-      react: 'https://esm.sh/react@17.0.2',
-      'react-dom': 'https://esm.sh/react-dom@17.0.2',
-    }),
+    cache({ importmap, directory: '.cache' }),
+    // externalAliasPlugin({
+    //   react: 'https://esm.sh/react@17.0.2',
+    //   'react-dom': 'https://esm.sh/react-dom@17.0.2',
+    // }),
   ],
 });
