@@ -1,8 +1,9 @@
+import { Fs } from '#types/fs.api';
 import { pipe } from '@mobily/ts-belt';
 import fs from 'node:fs/promises';
 import { T, Task } from './ts-belt-extra';
 
-export const safeFs = {
+export const safeFs: Fs = {
   writeFile(filePath: string, fileContents: string): Task<string, string> {
     return pipe(
       T.fromPromise(() => fs.writeFile(filePath, fileContents), String),
