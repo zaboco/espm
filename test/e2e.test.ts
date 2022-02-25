@@ -66,12 +66,6 @@ test('it writes types to disk if they are found', () => {
   /* esm.sh - react@17.0.2 */
   `;
 
-  const expectedManifest = `{
-  "dependencies": {
-    "react": "17.0.2"
-  }
-}`;
-
   const fsSpy = initFsSpy();
   const manager = initManager({
     fs: fsSpy,
@@ -98,7 +92,6 @@ test('it writes types to disk if they are found', () => {
       path: 'es-modules/react/index.d.ts',
       contents: validPackageSource,
     },
-    { type: 'writeFile', path: 'es-modules.json', contents: expectedManifest },
   ]);
 });
 

@@ -1,7 +1,7 @@
 import { T, Task } from '#lib/ts-belt-extra';
 import { Fs } from '#types/fs.api';
 import { HttpClient } from '#types/httpClient.api';
-import { A, D, flow, pipe, R, Result } from '@mobily/ts-belt';
+import { A, flow, pipe, R, Result } from '@mobily/ts-belt';
 import { initFilesManager } from './cli/filesManager';
 import { initRegistryClient } from './cli/registryClient';
 import { buildManifest } from './lib/manifest';
@@ -32,6 +32,7 @@ function buildCommands(services: Services) {
   const filesManager = initFilesManager(services.fs);
   const registryClient = initRegistryClient(services.httpClient);
 
+  // @ts-expect-error NOT used for now
   function writeManifest(
     packageIds: readonly PackageId[],
   ): Task<string, string> {
@@ -58,15 +59,16 @@ function buildCommands(services: Services) {
         T.flatMap(flow(A.map(filesManager.storeTypes), T.all)),
       );
 
-      const writeManifestTask = pipe(
-        fetchPackagesTask,
-        T.map(A.map(D.getUnsafe('id'))),
-        T.flatMap(writeManifest),
-      );
+      // const writeManifestTask = pipe(
+      //   fetchPackagesTask,
+      //   T.map(A.map(D.getUnsafe('id'))),
+      //   T.flatMap(writeManifest),
+      // );
 
       return pipe(
         writeTypesTask,
-        T.flatMap(() => writeManifestTask),
+        T.map(() => 'ok'),
+        // T.flatMap(() => writeManifestTask),
       );
     },
     remove(packageIds: readonly GivenPackageId[]) {
