@@ -1,7 +1,8 @@
 import { Task } from '#lib/ts-belt-extra';
-import { IncomingMessage } from 'http';
+import { IncomingHttpHeaders } from 'http';
 
-export interface HttpResponse<T> extends IncomingMessage {
+export interface HttpResponse<T> {
+  headers: IncomingHttpHeaders;
   data: T;
 }
 

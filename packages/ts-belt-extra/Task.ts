@@ -16,6 +16,11 @@ export const fork =
     task.fork(onRej, onRes);
   };
 
+export const run =
+  <R, E>(onRes: (r: R) => void) =>
+  (task: Task<R, E>): void =>
+    task.fork(() => {}, onRes);
+
 export const rejected = <E>(e: E): Task<never, E> =>
   make((rej) => {
     rej(e);

@@ -1,10 +1,10 @@
 import { A, O, pipe, R, Result, S } from '@mobily/ts-belt';
 import {
-  PackageId,
-  PackageDescriptor,
-  PackageName,
-  GivenPackageId,
   CodeText,
+  GivenPackageId,
+  PackageDescriptor,
+  PackageId,
+  PackageName,
 } from 'src/types';
 
 export function packageNameFromId(
@@ -31,6 +31,7 @@ export function extractPackageIdFromIndexSource(
   return pipe(
     packageIndexSource,
     CodeText.unwrap,
+    S.trim,
     S.split('\n'),
     A.head,
     O.flatMap(S.match(esmHeaderRegex)),

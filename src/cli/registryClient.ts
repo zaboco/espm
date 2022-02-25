@@ -1,11 +1,10 @@
 import { AX, T, Task } from '#lib/ts-belt-extra';
-import { HttpClient } from '#types/httpClient.api';
+import { HttpClient, HttpResponse } from '#types/httpClient.api';
 import { A, D, flow, O, pipe } from '@mobily/ts-belt';
-import { HttpieResponse } from 'httpie';
 import { extractPackageIdFromIndexSource } from 'src/lib/packages';
 import { CodeText, GivenPackageId, Package } from 'src/types';
 
-const TYPES_URL_HEADER = 'x-typescript-types';
+export const TYPES_URL_HEADER = 'x-typescript-types';
 
 function buildPackageUrl(givenPackageId: GivenPackageId) {
   return `https://esm.sh/${givenPackageId}?bundle`;
@@ -45,12 +44,12 @@ export function initRegistryClient(httpClient: HttpClient) {
 
 const getData =
   <R, E>(errorValue: NonNullable<E>) =>
-  (response: HttpieResponse<R>): Task<R, E> =>
+  (response: HttpResponse<R>): Task<R, E> =>
     pipe(response, D.get('data'), T.fromOption(errorValue));
 
 const getHeader =
   (header: string) =>
-  (response: HttpieResponse): Task<string, string> =>
+  (response: HttpResponse<unknown>): Task<string, string> =>
     pipe(
       response,
       D.getUnsafe('headers'),
