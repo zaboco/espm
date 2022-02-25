@@ -1,14 +1,11 @@
 import { AX, T, Task } from '#lib/ts-belt-extra';
-import { HttpClient, HttpResponse } from '#types/httpClient.api';
-import { A, D, flow, O, pipe } from '@mobily/ts-belt';
+import { HttpClient, HttpResponse, HttpTask } from '#types/httpClient.api';
+import { A, D, flow, O, pipe, S } from '@mobily/ts-belt';
 import { extractPackageIdFromIndexSource } from 'src/lib/packages';
-import { CodeText, GivenPackageId, Package } from 'src/types';
+import { CodeText, GivenPackageId, Package, TypesResource } from 'src/types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
-
-function buildPackageUrl(givenPackageId: GivenPackageId) {
-  return `https://esm.sh/${givenPackageId}`;
-}
+export const REGISTRY_BASE_URL = `https://cdn.esm.sh`;
 
 export function initRegistryClient(httpClient: HttpClient) {
   return {
@@ -22,24 +19,42 @@ export function initRegistryClient(httpClient: HttpClient) {
         T.flatMap(flow(extractPackageIdFromIndexSource, T.fromResult)),
       );
 
-      const typesTextTask = pipe(
+      const typesResourceTask = buildTypesResource(
         responseTask,
-        T.flatMap(getHeader(TYPES_URL_HEADER)),
-        T.flatMap((typesUrl) => httpClient.get<string>(typesUrl)),
-        T.flatMap(getData(`Package types file missing: ${givenPackageId}`)),
-        T.map(CodeText.of),
+        givenPackageId,
       );
 
-      return T.zipWith(
-        packageIdTask,
-        typesTextTask,
-        (packageId, typesText) => ({
-          id: packageId,
-          typesText,
-        }),
-      );
+      return T.zipWith(packageIdTask, typesResourceTask, Package.make);
     },
   };
+
+  function buildTypesResource(
+    responseTask: HttpTask<string>,
+    givenPackageId: GivenPackageId,
+  ) {
+    const typesUrlTask = pipe(
+      responseTask,
+      T.flatMap(getHeader(TYPES_URL_HEADER)),
+    );
+
+    const typesRelativeUrlTask = pipe(
+      typesUrlTask,
+      T.map(S.replace(REGISTRY_BASE_URL, '')),
+    );
+
+    const typesTextTask = pipe(
+      typesUrlTask,
+      T.flatMap((typesUrl) => httpClient.get<string>(typesUrl)),
+      T.flatMap(getData(`Package types file missing: ${givenPackageId}`)),
+      T.map(CodeText.of),
+    );
+
+    return T.zipWith(typesRelativeUrlTask, typesTextTask, TypesResource.make);
+  }
+}
+
+function buildPackageUrl(givenPackageId: GivenPackageId) {
+  return `${REGISTRY_BASE_URL}/${givenPackageId}`;
 }
 
 const getData =

@@ -2,7 +2,8 @@ import { T } from '#lib/ts-belt-extra';
 import { pipe } from '@mobily/ts-belt';
 import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
-import { TYPES_URL_HEADER } from '../src/cli/registryClient';
+import { MODULES_DIRECTORY_NAME } from '../src/cli/filesManager';
+import { REGISTRY_BASE_URL, TYPES_URL_HEADER } from '../src/cli/registryClient';
 import { initManager } from '../src/core';
 import { expectToEqual } from './__helpers__/assertions';
 import {
@@ -15,15 +16,17 @@ import { initHttpClientStub } from './__support__/httpClient.stub';
 const test = suite('e2e');
 
 test('it writes types to disk if they are found', () => {
+  const packageId = 'react';
+  const typesRelativePath = 'v66/@types/react@17.0.39/index.d.ts';
   const validPackageSource = `
-  /* esm.sh - react@17.0.2 */
+  /* esm.sh - ${packageId}@17.0.2 */
   `;
-  const typesSource = 'declare module "react";';
+  const typesSource = 'whatever';
 
   const fsSpy = initFsSpy();
-  const typesUrl = 'https://cdn.esm.sh/v66/@types/react@17.0.39/index.d.ts';
+  const typesUrl = `https://cdn.esm.sh/${typesRelativePath}`;
   const httpClientStub = initHttpClientStub({
-    'https://esm.sh/react': T.of({
+    [`${REGISTRY_BASE_URL}/${packageId}`]: T.of({
       data: validPackageSource,
       headers: {
         [TYPES_URL_HEADER]: typesUrl,
@@ -41,16 +44,22 @@ test('it writes types to disk if they are found', () => {
   });
 
   pipe(
-    { action: 'add', packageIds: ['react'] },
+    { action: 'add', packageIds: [packageId] },
     manager.runCommand,
     assertTaskSuccess(),
   );
 
+  const expectedRealPath = `${MODULES_DIRECTORY_NAME}/.deps/${typesRelativePath}`;
   expectToEqual(fsSpy.getPerformedActions(), [
     {
       type: 'writeFile',
-      path: 'es-modules/react/index.d.ts',
+      path: expectedRealPath,
       contents: typesSource,
+    },
+    {
+      type: 'symlink',
+      target: expectedRealPath,
+      path: `${MODULES_DIRECTORY_NAME}/${packageId}/index.d.ts`,
     },
   ]);
 });
@@ -63,7 +72,7 @@ test('it fails if the package source header is not valid', () => {
   const manager = initManager({
     fs: initFsSpy(),
     httpClient: initHttpClientStub({
-      'https://esm.sh/whatever': T.of({
+      [`${REGISTRY_BASE_URL}/whatever`]: T.of({
         data: invalidPackageSource,
         headers: {},
       }),
@@ -84,7 +93,7 @@ test('it fails if there is a registry error', () => {
   const manager = initManager({
     fs: initFsSpy(),
     httpClient: initHttpClientStub({
-      'https://esm.sh/whatever': T.rejected(registryError),
+      [`${REGISTRY_BASE_URL}/whatever`]: T.rejected(registryError),
     }),
   });
 

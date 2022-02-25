@@ -1,11 +1,13 @@
 import { SX, T, Task } from '#lib/ts-belt-extra';
 import { Fs } from '#types/fs.api';
 import { pipe, R } from '@mobily/ts-belt';
+import path from 'node:path';
 import { packageNameFromId } from 'src/lib/packages';
-import { Manifest, GivenPackageId, Package, CodeText } from 'src/types';
+import { CodeText, GivenPackageId, Manifest, Package } from 'src/types';
 
-const MODULES_DIRECTORY_NAME = 'es-modules';
+export const MODULES_DIRECTORY_NAME = 'es-modules';
 const MANIFEST_FILE_NAME = 'es-modules.json';
+const DEPS_DIRECTORY_NAME = '.deps';
 
 const logger = {
   // @ts-expect-error unused right now
@@ -16,19 +18,30 @@ const logger = {
 
 export function initFilesManager(fs: Fs) {
   return {
-    storeTypes: (pkg: Package): Task<string, string> =>
-      pipe(
+    storeTypes: (pkg: Package): Task<string, string> => {
+      const realPath = path.join(
+        MODULES_DIRECTORY_NAME,
+        DEPS_DIRECTORY_NAME,
+        pkg.types.relativeUrl,
+      );
+      const aliasPathTask = pipe(
         pkg.id,
         packageNameFromId,
-        R.map(SX.prepend(`${MODULES_DIRECTORY_NAME}/`)),
-        T.fromResult,
-        T.flatMap((dirName) =>
-          fs.writeFile(`${dirName}/index.d.ts`, CodeText.unwrap(pkg.typesText)),
+        R.map((pkgName) =>
+          path.join(MODULES_DIRECTORY_NAME, pkgName, 'index.d.ts'),
         ),
+        T.fromResult,
+      );
+
+      return pipe(
+        fs.writeFile(realPath, CodeText.unwrap(pkg.types.text)),
+        T.flatMap(() => aliasPathTask),
+        T.flatMap((aliasPath) => fs.symlink(realPath, aliasPath)),
         T.tap((fileName) => {
           logger.info('Wrote types file:', fileName);
         }),
-      ),
+      );
+    },
 
     removeTypes: (packageId: GivenPackageId) =>
       pipe(

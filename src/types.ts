@@ -12,14 +12,27 @@ export interface RemoveCommand {
   packageIds: readonly GivenPackageId[];
 }
 
-export interface Package {
-  id: PackageId;
-  typesText: CodeText;
+export interface TypesResource {
+  relativeUrl: string;
+  text: CodeText;
 }
 
-export interface PackageWithSource extends Package {
-  sourceText: CodeText;
+export interface Package {
+  id: PackageId;
+  types: TypesResource;
 }
+
+export const TypesResource = {
+  make(relativeUrl: string, text: CodeText): TypesResource {
+    return { relativeUrl, text };
+  },
+};
+
+export const Package = {
+  make(id: PackageId, types: TypesResource): Package {
+    return { id, types };
+  },
+};
 
 export type CodeText = Id<'CodeText', string>;
 
