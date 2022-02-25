@@ -21,7 +21,7 @@ export const run =
   (task: Task<R, E>): void =>
     task.fork(() => {}, onRes);
 
-export const rejected = <E>(e: E): Task<never, E> =>
+export const rejected = <R, E>(e: E): Task<R, E> =>
   make((rej) => {
     rej(e);
   });

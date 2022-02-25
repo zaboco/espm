@@ -18,18 +18,26 @@ test('it writes types to disk if they are found', () => {
   const validPackageSource = `
   /* esm.sh - react@17.0.2 */
   `;
+  const typesSource = 'declare module "react";';
 
   const fsSpy = initFsSpy();
+  const typesUrl = 'https://cdn.esm.sh/v66/@types/react@17.0.39/index.d.ts';
+  const httpClientStub = initHttpClientStub({
+    'https://esm.sh/react': T.of({
+      data: validPackageSource,
+      headers: {
+        [TYPES_URL_HEADER]: typesUrl,
+      },
+    }),
+    [typesUrl]: T.of({
+      data: typesSource,
+      headers: {},
+    }),
+  });
+
   const manager = initManager({
     fs: fsSpy,
-    httpClient: initHttpClientStub(
-      T.of({
-        data: validPackageSource,
-        headers: {
-          [TYPES_URL_HEADER]: 'foo',
-        },
-      }),
-    ),
+    httpClient: httpClientStub,
   });
 
   pipe(
@@ -43,24 +51,24 @@ test('it writes types to disk if they are found', () => {
     {
       type: 'writeFile',
       path: 'es-modules/react/index.d.ts',
-      contents: validPackageSource,
+      contents: typesSource,
     },
   ]);
 });
 
 test('it fails if the package source header is not valid', () => {
   const invalidPackageSource = `
-/* wrong format esm.sh - react@17.0.2 */
+/* wrong format */
 `;
 
   const manager = initManager({
     fs: initFsSpy(),
-    httpClient: initHttpClientStub(
-      T.of({
+    httpClient: initHttpClientStub({
+      'https://esm.sh/whatever': T.of({
         data: invalidPackageSource,
         headers: {},
       }),
-    ),
+    }),
   });
 
   pipe(
@@ -76,7 +84,9 @@ test('it fails if there is a registry error', () => {
   const registryError = 'Not found';
   const manager = initManager({
     fs: initFsSpy(),
-    httpClient: initHttpClientStub(T.rejected(registryError)),
+    httpClient: initHttpClientStub({
+      'https://esm.sh/whatever': T.rejected(registryError),
+    }),
   });
 
   pipe(

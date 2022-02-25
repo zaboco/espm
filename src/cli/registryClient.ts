@@ -7,7 +7,7 @@ import { CodeText, GivenPackageId, Package } from 'src/types';
 export const TYPES_URL_HEADER = 'x-typescript-types';
 
 function buildPackageUrl(givenPackageId: GivenPackageId) {
-  return `https://esm.sh/${givenPackageId}?bundle`;
+  return `https://esm.sh/${givenPackageId}`;
 }
 
 export function initRegistryClient(httpClient: HttpClient) {
