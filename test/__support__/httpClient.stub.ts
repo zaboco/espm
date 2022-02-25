@@ -6,7 +6,7 @@ interface HttpClientStub extends HttpClient {
   overrideHttpTasks(customHttpTasks: HttpTaskRecord): void;
 }
 
-type UrlPath = string | never;
+type UrlPath = string & {};
 type HttpTaskRecord = Record<UrlPath, HttpTask<unknown>>;
 
 export function initHttpClientStub(

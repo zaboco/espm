@@ -22,12 +22,11 @@ export function initFilesManager(fs: Fs) {
         packageNameFromId,
         R.map(SX.prepend(`${MODULES_DIRECTORY_NAME}/`)),
         T.fromResult,
-        T.flatMap(fs.mkdir),
-        T.tap((dirName) => {
-          logger.info('Created directory:', dirName);
-        }),
         T.flatMap((dirName) =>
-          fs.writeFile(`${dirName}/index.d.ts`, CodeText.unwrap(pkg.typesText)),
+          fs.writeFileDeep(
+            `${dirName}/index.d.ts`,
+            CodeText.unwrap(pkg.typesText),
+          ),
         ),
         T.tap((fileName) => {
           logger.info('Wrote types file:', fileName);
@@ -48,7 +47,7 @@ export function initFilesManager(fs: Fs) {
 
     writeManifest: (manifest: Manifest): Task<string, string> => {
       return pipe(
-        fs.writeFile(MANIFEST_FILE_NAME, JSON.stringify(manifest, null, 2)),
+        fs.writeFileDeep(MANIFEST_FILE_NAME, JSON.stringify(manifest, null, 2)),
         T.tap((manifestName) => {
           logger.info('Created manifest file:', manifestName);
         }),

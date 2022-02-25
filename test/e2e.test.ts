@@ -47,9 +47,8 @@ test('it writes types to disk if they are found', () => {
   );
 
   expectToEqual(fsSpy.getPerformedActions(), [
-    { type: 'mkdir', path: 'es-modules/react' },
     {
-      type: 'writeFile',
+      type: 'writeFileDeep',
       path: 'es-modules/react/index.d.ts',
       contents: typesSource,
     },
