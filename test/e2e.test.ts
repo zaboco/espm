@@ -1,6 +1,4 @@
 import { T } from '#lib/ts-belt-extra';
-import { FilePath, Fs } from '#types/fs.api';
-import { HttpClient, HttpTask } from '#types/httpClient.api';
 import { pipe } from '@mobily/ts-belt';
 import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
@@ -11,55 +9,10 @@ import {
   assertTaskError,
   assertTaskSuccess,
 } from './__helpers__/taskAssertions';
+import { initFsSpy } from './__support__/fs.spy';
+import { initHttpClientStub } from './__support__/httpClient.stub';
 
 const test = suite('e2e');
-
-function initHttpClientStub(httpTask: HttpTask<string>): HttpClient {
-  return {
-    get<R>(_url: string): HttpTask<R> {
-      return httpTask as unknown as HttpTask<R>;
-    },
-  };
-}
-
-type FsAction =
-  | { type: 'rm'; path: FilePath }
-  | { type: 'rmdir'; path: FilePath }
-  | { type: 'mkdir'; path: FilePath }
-  | { type: 'writeFile'; path: FilePath; contents: string };
-
-interface FsSpy extends Fs {
-  getPerformedActions(): FsAction[];
-}
-
-function initFsSpy(): FsSpy {
-  const actions: FsAction[] = [];
-  return {
-    rm(filePath) {
-      actions.push({ type: 'rm', path: filePath });
-      return T.of(filePath);
-    },
-    rmdir(filePath) {
-      actions.push({ type: 'rmdir', path: filePath });
-      return T.of(filePath);
-    },
-    mkdir(filePath) {
-      actions.push({ type: 'mkdir', path: filePath });
-      return T.of(filePath);
-    },
-    writeFile(filePath, fileContents: string) {
-      actions.push({
-        type: 'writeFile',
-        path: filePath,
-        contents: fileContents,
-      });
-      return T.of(filePath);
-    },
-    getPerformedActions() {
-      return actions;
-    },
-  };
-}
 
 test('it writes types to disk if they are found', () => {
   const validPackageSource = `
