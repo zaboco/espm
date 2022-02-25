@@ -7,6 +7,13 @@ import { Manifest, GivenPackageId, Package, CodeText } from 'src/types';
 const MODULES_DIRECTORY_NAME = 'es-modules';
 const MANIFEST_FILE_NAME = 'es-modules.json';
 
+const logger = {
+  // @ts-expect-error unused right now
+  info(...args: unknown[]): void {
+    // console.log('[INFO]', ...args);
+  },
+};
+
 export function initFilesManager(fs: Fs) {
   return {
     storeTypes: (pkg: Package): Task<string, string> =>
@@ -17,13 +24,13 @@ export function initFilesManager(fs: Fs) {
         T.fromResult,
         T.flatMap(fs.mkdir),
         T.tap((dirName) => {
-          console.log('[INFO] Created directory:', dirName);
+          logger.info('Created directory:', dirName);
         }),
         T.flatMap((dirName) =>
           fs.writeFile(`${dirName}/index.d.ts`, CodeText.unwrap(pkg.typesText)),
         ),
         T.tap((fileName) => {
-          console.log('[INFO] Wrote types file:', fileName);
+          logger.info('Wrote types file:', fileName);
         }),
       ),
 
@@ -35,7 +42,7 @@ export function initFilesManager(fs: Fs) {
         T.fromResult,
         T.flatMap(fs.rmdir),
         T.tap((dirName) => {
-          console.log('[INFO] Removed directory:', dirName);
+          logger.info('Removed directory:', dirName);
         }),
       ),
 
@@ -43,7 +50,7 @@ export function initFilesManager(fs: Fs) {
       return pipe(
         fs.writeFile(MANIFEST_FILE_NAME, JSON.stringify(manifest, null, 2)),
         T.tap((manifestName) => {
-          console.log('[INFO] Created manifest file:', manifestName);
+          logger.info('Created manifest file:', manifestName);
         }),
       );
     },
