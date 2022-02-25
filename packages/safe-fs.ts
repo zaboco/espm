@@ -5,8 +5,7 @@ import path from 'node:path';
 import { T, Task } from './ts-belt-extra';
 
 export const safeFs: Fs = {
-  writeFile: writeFile,
-  writeFileDeep(filePath, fileContents) {
+  writeFile(filePath, fileContents) {
     const dirPath = path.dirname(filePath);
     return pipe(
       mkdir(dirPath),
@@ -28,7 +27,6 @@ export const safeFs: Fs = {
       T.map(() => dirPath),
     );
   },
-  mkdir: mkdir,
   symlink(target, path) {
     return pipe(
       T.fromPromise(() => fs.symlink(target, path), String),
