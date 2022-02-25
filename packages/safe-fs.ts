@@ -27,13 +27,27 @@ export const safeFs: Fs = {
       T.map(() => dirPath),
     );
   },
-  symlink(target, path) {
+  symlink(target, filePath) {
+    const tmpFilePath = `${filePath}_${Date.now()}`;
     return pipe(
-      T.fromPromise(() => fs.symlink(target, path), String),
-      T.map(() => path),
+      mkdir(path.dirname(filePath)),
+      T.flatMap(() => symlinkTask(target, tmpFilePath)),
+      T.flatMap(() => renameTask(tmpFilePath, filePath)),
+      T.map(() => filePath),
     );
   },
 };
+
+function symlinkTask(target: FilePath, filePath: FilePath) {
+  return T.fromPromise(
+    () => fs.symlink(path.resolve(target), filePath),
+    String,
+  );
+}
+
+function renameTask(oldPath: FilePath, newPath: FilePath) {
+  return T.fromPromise(() => fs.rename(oldPath, newPath), String);
+}
 
 function writeFile(
   filePath: FilePath,
