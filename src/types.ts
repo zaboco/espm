@@ -18,7 +18,7 @@ export interface TypesResource {
 }
 
 export interface Package {
-  id: PackageId;
+  identifier: PackageIdentifier;
   types: TypesResource;
 }
 
@@ -29,8 +29,8 @@ export const TypesResource = {
 };
 
 export const Package = {
-  make(id: PackageId, types: TypesResource): Package {
-    return { id, types };
+  make(identifier: PackageIdentifier, types: TypesResource): Package {
+    return { identifier: identifier, types };
   },
 };
 

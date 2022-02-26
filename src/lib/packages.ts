@@ -7,11 +7,11 @@ import {
   PackageName,
 } from 'src/types';
 
-export function packageNameFromId(
-  packageId: PackageSpecifier,
+export function packageNameFromSpecifier(
+  packageSpecifier: PackageSpecifier,
 ): Result<PackageName, string> {
   return pipe(
-    packageId,
+    packageSpecifier,
     packageIdentifierFromId,
     R.map((d) => d.name),
   );
@@ -56,6 +56,6 @@ export function packageIdentifierFromId(
         O.map<string, PackageIdentifier>((name) => ({ name, version })),
       );
     }),
-    R.fromFalsy(`Package id is invalid: ${packageId}`),
+    R.fromFalsy(`Package specifier is invalid: ${packageId}`),
   );
 }

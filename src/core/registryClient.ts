@@ -1,7 +1,10 @@
 import { AX, T, Task } from '#lib/ts-belt-extra';
 import { HttpClient, HttpResponse, HttpTask } from '#types/httpClient.api';
-import { A, D, flow, O, pipe, S } from '@mobily/ts-belt';
-import { extractPackageIdFromIndexSource } from 'src/lib/packages';
+import { A, D, flow, O, pipe, R, S } from '@mobily/ts-belt';
+import {
+  extractPackageIdFromIndexSource,
+  packageIdentifierFromId,
+} from 'src/lib/packages';
 import { CodeText, PackageSpecifier, Package, TypesResource } from 'src/types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
@@ -12,11 +15,17 @@ export function initRegistryClient(httpClient: HttpClient) {
     fetchPackage(packageSpecifier: PackageSpecifier): Task<Package, string> {
       const packageURL = buildPackageUrl(packageSpecifier);
       const responseTask = httpClient.get<string>(packageURL);
-      const packageIdTask = pipe(
+      const packageIdentifierTask = pipe(
         responseTask,
         T.flatMap(getData(`Package index file missing: ${packageSpecifier}`)),
         T.map(CodeText.of),
-        T.flatMap(flow(extractPackageIdFromIndexSource, T.fromResult)),
+        T.flatMap(
+          flow(
+            extractPackageIdFromIndexSource,
+            R.flatMap(packageIdentifierFromId),
+            T.fromResult,
+          ),
+        ),
       );
 
       const typesResourceTask = buildTypesResource(
@@ -24,7 +33,7 @@ export function initRegistryClient(httpClient: HttpClient) {
         packageSpecifier,
       );
 
-      return T.zipWith(packageIdTask, typesResourceTask, Package.make);
+      return T.zipWith(packageIdentifierTask, typesResourceTask, Package.make);
     },
   };
 
