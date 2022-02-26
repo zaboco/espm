@@ -1,6 +1,6 @@
 import { AX, pipeTask, T, Task } from '#lib/ts-belt-extra';
 import { HttpClient, HttpResponse, HttpTask } from '#types/httpClient.api';
-import { A, D, O, pipe, R, Result, S } from '@mobily/ts-belt';
+import { A, D, O, pipe, S } from '@mobily/ts-belt';
 import {
   extractPackageIdFromIndexSource,
   packageIdentifierFromId,
@@ -16,19 +16,12 @@ export function initRegistryClient(httpClient: HttpClient) {
       const packageURL = buildPackageUrl(packageSpecifier);
       const responseTask = httpClient.get<string>(packageURL);
 
-      const getPackageIdentifierResult = (response: HttpResponse<string>) =>
-        pipe(
-          response,
-          getDataResult(`Package index file missing: ${packageSpecifier}`),
-          R.map(CodeText.of),
-          R.flatMap(extractPackageIdFromIndexSource),
-          R.flatMap(packageIdentifierFromId),
-        );
-
-      const packageIdentifierTask = pipe(
+      const packageIdentifierTask = pipeTask(
         responseTask,
-        T.map(getPackageIdentifierResult),
-        T.flatMap(T.fromResult),
+        getData(`Package index file missing: ${packageSpecifier}`),
+        CodeText.of,
+        extractPackageIdFromIndexSource,
+        packageIdentifierFromId,
       );
 
       const typesResourceTask = buildTypesResource(
@@ -70,16 +63,6 @@ const getData =
   <R, E>(errorValue: NonNullable<E>) =>
   (response: HttpResponse<R>): Task<R, E> =>
     pipe(response, D.get('data'), T.fromOption(errorValue));
-
-const getDataResult =
-  <R, E>(errorValue: NonNullable<E>) =>
-  (response: HttpResponse<R>): Result<R, E> =>
-    pipe(response, D.get('data'), R.fromNullable(errorValue));
-
-// const getOptionalData =
-//   <R, E>(errorValue: NonNullable<E>) =>
-//     (response: HttpResponse<R>): Task<R, E> =>
-//       pipe(response, D.get('data'), T.fromOption(errorValue));
 
 const getHeader =
   (header: string) =>

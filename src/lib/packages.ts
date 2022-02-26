@@ -1,4 +1,5 @@
-import { A, O, pipe, R, Result, S } from '@mobily/ts-belt';
+import { T, Task } from '#lib/ts-belt-extra';
+import { A, O, pipe, S } from '@mobily/ts-belt';
 import {
   CodeText,
   PackageSpecifier,
@@ -9,11 +10,11 @@ import {
 
 export function packageNameFromSpecifier(
   packageSpecifier: PackageSpecifier,
-): Result<PackageName, string> {
+): Task<PackageName, string> {
   return pipe(
     packageSpecifier,
     packageIdentifierFromId,
-    R.map((d) => d.name),
+    T.map((d) => d.name),
   );
 }
 
@@ -25,7 +26,7 @@ export function packageNameFromSpecifier(
  */
 export function extractPackageIdFromIndexSource(
   packageIndexSource: CodeText,
-): Result<PackageId, string> {
+): Task<PackageId, string> {
   const esmHeaderRegex = /^\/\* esm.sh - (.+) \*\/$/;
 
   return pipe(
@@ -36,13 +37,13 @@ export function extractPackageIdFromIndexSource(
     A.head,
     O.flatMap(S.match(esmHeaderRegex)),
     O.flatMap(A.at(1)),
-    R.fromFalsy(`Invalid package source: ${packageIndexSource}`),
+    T.fromOption(`Invalid package source: ${packageIndexSource}`),
   );
 }
 
 export function packageIdentifierFromId(
   packageId: PackageSpecifier,
-): Result<PackageIdentifier, string> {
+): Task<PackageIdentifier, string> {
   const packageIdRegex = /^(@?[^@]+)(?:@(.+))?/;
   return pipe(
     packageId,
@@ -56,6 +57,6 @@ export function packageIdentifierFromId(
         O.map<string, PackageIdentifier>((name) => ({ name, version })),
       );
     }),
-    R.fromFalsy(`Package specifier is invalid: ${packageId}`),
+    T.fromOption(`Package specifier is invalid: ${packageId}`),
   );
 }

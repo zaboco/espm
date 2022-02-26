@@ -1,12 +1,12 @@
 import { T, Task } from '#lib/ts-belt-extra';
 import { Fs } from '#types/fs.api';
 import { HttpClient } from '#types/httpClient.api';
-import { A, flow, pipe, R, Result } from '@mobily/ts-belt';
+import { A, flow, pipe } from '@mobily/ts-belt';
 import { initFilesManager } from './core/filesManager';
 import { initRegistryClient } from './core/registryClient';
 import { buildManifest } from './lib/manifest';
 import { packageIdentifierFromId } from './lib/packages';
-import { Command, PackageSpecifier, PackageId } from './types';
+import { Command, PackageId, PackageSpecifier } from './types';
 
 interface Services {
   fs: Fs;
@@ -39,9 +39,8 @@ function buildCommands(services: Services) {
     return pipe(
       packageIds,
       A.map(packageIdentifierFromId),
-      combineResults,
-      R.map(buildManifest),
-      T.fromResult,
+      T.all,
+      T.map(buildManifest),
       T.flatMap(filesManager.writeManifest),
     );
   }
@@ -68,19 +67,4 @@ function buildCommands(services: Services) {
       return pipe(packageSpecifiers, A.map(filesManager.removeTypes), T.all);
     },
   };
-}
-
-function combineResults<$R, $E>(
-  results: readonly Result<$R, $E>[],
-): Result<readonly $R[], $E> {
-  return pipe(
-    results,
-    A.reduce(resultOf<readonly $R[], $E>([]), (acc, result) =>
-      R.flatMap(acc, (a) => R.map(result, (r) => A.prepend(a, r))),
-    ),
-  );
-}
-
-function resultOf<$R, $E>(r: NonNullable<$R>): Result<$R, $E> {
-  return R.Ok(r);
 }

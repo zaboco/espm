@@ -1,6 +1,6 @@
 import { pipeTask, SX, T, Task } from '#lib/ts-belt-extra';
 import { Fs } from '#types/fs.api';
-import { F, pipe, R } from '@mobily/ts-belt';
+import { F, pipe } from '@mobily/ts-belt';
 import path from 'node:path';
 import { packageNameFromSpecifier } from 'src/lib/packages';
 import { CodeText, PackageSpecifier, Manifest, Package } from 'src/types';
@@ -38,13 +38,12 @@ export function initFilesManager(fs: Fs) {
     },
 
     removeTypes: (packageSpecifier: PackageSpecifier) =>
-      pipe(
-        packageSpecifier,
-        packageNameFromSpecifier,
-        R.map(SX.prepend(`${MODULES_DIRECTORY_NAME}/`)),
-        T.fromResult,
-        T.flatMap(fs.rmdir),
-        T.tap((dirName) => {
+      pipeTask(
+        packageNameFromSpecifier(packageSpecifier),
+        SX.prepend(`${MODULES_DIRECTORY_NAME}/`),
+        fs.rmdir,
+        (v) => v,
+        F.tap((dirName) => {
           logger.info('Removed directory:', dirName);
         }),
       ),
