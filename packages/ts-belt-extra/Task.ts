@@ -88,6 +88,12 @@ export const fromOption =
   (option: Option<R>): Task<R, E> =>
     pipe(option, O.toResult(errorValue), fromResult);
 
+export function isTask<O, R, E>(
+  potentialTask: Task<R, E> | O,
+): potentialTask is Task<R, E> {
+  return typeof potentialTask === 'object' && 'fork' in potentialTask;
+}
+
 export const sequence = <R, E>(
   tasks: readonly Task<R, E>[],
 ): Task<readonly R[], E> => {

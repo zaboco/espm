@@ -2,15 +2,12 @@ import { FilePath, Fs } from '#types/fs.api';
 import { pipe } from '@mobily/ts-belt';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { T, Task } from './ts-belt-extra';
+import { pipeTask, T, Task } from './ts-belt-extra';
 
 export const safeFs: Fs = {
   writeFile(filePath, fileContents) {
     const dirPath = path.dirname(filePath);
-    return pipe(
-      mkdir(dirPath),
-      T.flatMap(() => writeFile(filePath, fileContents)),
-    );
+    return pipeTask(mkdir(dirPath), () => writeFile(filePath, fileContents));
   },
   rm(filePath) {
     return pipe(
@@ -29,11 +26,11 @@ export const safeFs: Fs = {
   },
   symlink(target, filePath) {
     const tmpFilePath = `${filePath}_${Date.now()}`;
-    return pipe(
+    return pipeTask(
       mkdir(path.dirname(filePath)),
-      T.flatMap(() => symlinkTask(target, tmpFilePath)),
-      T.flatMap(() => renameTask(tmpFilePath, filePath)),
-      T.map(() => filePath),
+      () => symlinkTask(target, tmpFilePath),
+      () => renameTask(tmpFilePath, filePath),
+      () => filePath,
     );
   },
 };

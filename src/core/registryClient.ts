@@ -1,4 +1,4 @@
-import { AX, T, Task } from '#lib/ts-belt-extra';
+import { AX, pipeTask, T, Task } from '#lib/ts-belt-extra';
 import { HttpClient, HttpResponse, HttpTask } from '#types/httpClient.api';
 import { A, D, O, pipe, R, Result, S } from '@mobily/ts-belt';
 import {
@@ -44,21 +44,18 @@ export function initRegistryClient(httpClient: HttpClient) {
     responseTask: HttpTask<string>,
     packageSpecifier: PackageSpecifier,
   ) {
-    const typesUrlTask = pipe(
-      responseTask,
-      T.flatMap(getHeader(TYPES_URL_HEADER)),
+    const typesUrlTask = pipeTask(responseTask, getHeader(TYPES_URL_HEADER));
+
+    const typesRelativeUrlTask = pipeTask(
+      typesUrlTask,
+      S.replace(REGISTRY_BASE_URL, ''),
     );
 
-    const typesRelativeUrlTask = pipe(
+    const typesTextTask = pipeTask(
       typesUrlTask,
-      T.map(S.replace(REGISTRY_BASE_URL, '')),
-    );
-
-    const typesTextTask = pipe(
-      typesUrlTask,
-      T.flatMap((typesUrl) => httpClient.get<string>(typesUrl)),
-      T.flatMap(getData(`Package types file missing: ${packageSpecifier}`)),
-      T.map(CodeText.of),
+      (typesUrl) => httpClient.get<string>(typesUrl),
+      getData(`Package types file missing: ${packageSpecifier}`),
+      CodeText.of,
     );
 
     return T.zipWith(typesRelativeUrlTask, typesTextTask, TypesResource.make);

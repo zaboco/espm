@@ -1,6 +1,6 @@
-import { SX, T, Task } from '#lib/ts-belt-extra';
+import { pipeTask, SX, T, Task } from '#lib/ts-belt-extra';
 import { Fs } from '#types/fs.api';
-import { pipe, R } from '@mobily/ts-belt';
+import { F, pipe, R } from '@mobily/ts-belt';
 import path from 'node:path';
 import { packageNameFromSpecifier } from 'src/lib/packages';
 import { CodeText, PackageSpecifier, Manifest, Package } from 'src/types';
@@ -28,10 +28,10 @@ export function initFilesManager(fs: Fs) {
         path.join(MODULES_DIRECTORY_NAME, pkgName, 'index.d.ts'),
       );
 
-      return pipe(
+      return pipeTask(
         fs.writeFile(realPath, CodeText.unwrap(pkg.types.text)),
-        T.flatMap(() => fs.symlink(realPath, aliasPath)),
-        T.tap((fileName) => {
+        () => fs.symlink(realPath, aliasPath),
+        F.tap((fileName) => {
           logger.info('Wrote types file:', fileName);
         }),
       );
