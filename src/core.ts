@@ -48,17 +48,6 @@ function buildCommands(services: Services) {
 
   return {
     add(packageIds: readonly GivenPackageId[]): Task<string, string> {
-      const fetchPackagesTask = pipe(
-        packageIds,
-        A.map(registryClient.fetchPackage),
-        T.all,
-      );
-
-      const writeTypesTask = pipe(
-        fetchPackagesTask,
-        T.flatMap(flow(A.map(filesManager.storeTypes), T.all)),
-      );
-
       // const writeManifestTask = pipe(
       //   fetchPackagesTask,
       //   T.map(A.map(D.getUnsafe('id'))),
@@ -66,7 +55,11 @@ function buildCommands(services: Services) {
       // );
 
       return pipe(
-        writeTypesTask,
+        packageIds,
+        A.map(
+          flow(registryClient.fetchPackage, T.flatMap(filesManager.storeTypes)),
+        ),
+        T.all,
         T.map(() => 'ok'),
         // T.flatMap(() => writeManifestTask),
       );
