@@ -2,7 +2,7 @@ import { A, O, pipe, R, Result, S } from '@mobily/ts-belt';
 import {
   CodeText,
   PackageSpecifier,
-  PackageDescriptor,
+  PackageIdentifier,
   PackageId,
   PackageName,
 } from 'src/types';
@@ -12,7 +12,7 @@ export function packageNameFromId(
 ): Result<PackageName, string> {
   return pipe(
     packageId,
-    packageDescriptorFromId,
+    packageIdentifierFromId,
     R.map((d) => d.name),
   );
 }
@@ -40,9 +40,9 @@ export function extractPackageIdFromIndexSource(
   );
 }
 
-export function packageDescriptorFromId(
+export function packageIdentifierFromId(
   packageId: PackageSpecifier,
-): Result<PackageDescriptor, string> {
+): Result<PackageIdentifier, string> {
   const packageIdRegex = /^(@?[^@]+)(?:@(.+))?/;
   return pipe(
     packageId,
@@ -53,7 +53,7 @@ export function packageDescriptorFromId(
 
       return pipe(
         optionalName,
-        O.map<string, PackageDescriptor>((name) => ({ name, version })),
+        O.map<string, PackageIdentifier>((name) => ({ name, version })),
       );
     }),
     R.fromFalsy(`Package id is invalid: ${packageId}`),

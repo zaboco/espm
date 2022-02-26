@@ -48,4 +48,4 @@ export interface Manifest {
   dependencies: Record<PackageName, PackageVersion>;
 }
 
-export type PackageDescriptor = { name: PackageName; version: PackageVersion };
+export type PackageIdentifier = { name: PackageName; version: PackageVersion };

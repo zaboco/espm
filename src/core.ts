@@ -5,7 +5,7 @@ import { A, flow, pipe, R, Result } from '@mobily/ts-belt';
 import { initFilesManager } from './core/filesManager';
 import { initRegistryClient } from './core/registryClient';
 import { buildManifest } from './lib/manifest';
-import { packageDescriptorFromId } from './lib/packages';
+import { packageIdentifierFromId } from './lib/packages';
 import { Command, PackageSpecifier, PackageId } from './types';
 
 interface Services {
@@ -38,7 +38,7 @@ function buildCommands(services: Services) {
   ): Task<string, string> {
     return pipe(
       packageIds,
-      A.map(packageDescriptorFromId),
+      A.map(packageIdentifierFromId),
       combineResults,
       R.map(buildManifest),
       T.fromResult,
