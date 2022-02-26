@@ -44,7 +44,7 @@ test('it writes types to disk if they are found', () => {
   });
 
   pipe(
-    { action: 'add', packageIds: [packageId] },
+    { action: 'add', packageSpecifiers: [packageId] },
     manager.runCommand,
     assertTaskSuccess(),
   );
@@ -80,7 +80,7 @@ test('it fails if the package source header is not valid', () => {
   });
 
   pipe(
-    { action: 'add', packageIds: ['whatever'] },
+    { action: 'add', packageSpecifiers: ['whatever'] },
     manager.runCommand,
     assertTaskError((e) => {
       assert.match(e, /invalid package source/i);
@@ -98,7 +98,7 @@ test('it fails if there is a registry error', () => {
   });
 
   pipe(
-    { action: 'add', packageIds: ['whatever'] },
+    { action: 'add', packageSpecifiers: ['whatever'] },
     manager.runCommand,
     assertTaskError((e) => {
       expectToEqual(e, registryError);

@@ -3,7 +3,7 @@ import { Fs } from '#types/fs.api';
 import { pipe, R } from '@mobily/ts-belt';
 import path from 'node:path';
 import { packageNameFromId } from 'src/lib/packages';
-import { CodeText, GivenPackageId, Manifest, Package } from 'src/types';
+import { CodeText, PackageSpecifier, Manifest, Package } from 'src/types';
 
 export const MODULES_DIRECTORY_NAME = 'es-modules';
 const MANIFEST_FILE_NAME = 'es-modules.json';
@@ -43,7 +43,7 @@ export function initFilesManager(fs: Fs) {
       );
     },
 
-    removeTypes: (packageId: GivenPackageId) =>
+    removeTypes: (packageId: PackageSpecifier) =>
       pipe(
         packageId,
         packageNameFromId,

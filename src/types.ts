@@ -4,12 +4,12 @@ export type Command = AddCommand | RemoveCommand;
 
 export interface AddCommand {
   action: 'add';
-  packageIds: readonly GivenPackageId[];
+  packageSpecifiers: readonly PackageSpecifier[];
 }
 
 export interface RemoveCommand {
   action: 'remove';
-  packageIds: readonly GivenPackageId[];
+  packageSpecifiers: readonly PackageSpecifier[];
 }
 
 export interface TypesResource {
@@ -38,7 +38,7 @@ export type CodeText = Id<'CodeText', string>;
 
 export const CodeText = factory<'CodeText', string>('CodeText');
 
-export type GivenPackageId = PackageName | PackageId;
+export type PackageSpecifier = PackageName | PackageId;
 export type PackageId = `${PackageName}@${PackageVersion}`;
 
 export type PackageName = string & {};

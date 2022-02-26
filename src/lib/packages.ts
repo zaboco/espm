@@ -1,14 +1,14 @@
 import { A, O, pipe, R, Result, S } from '@mobily/ts-belt';
 import {
   CodeText,
-  GivenPackageId,
+  PackageSpecifier,
   PackageDescriptor,
   PackageId,
   PackageName,
 } from 'src/types';
 
 export function packageNameFromId(
-  packageId: GivenPackageId,
+  packageId: PackageSpecifier,
 ): Result<PackageName, string> {
   return pipe(
     packageId,
@@ -41,7 +41,7 @@ export function extractPackageIdFromIndexSource(
 }
 
 export function packageDescriptorFromId(
-  packageId: GivenPackageId,
+  packageId: PackageSpecifier,
 ): Result<PackageDescriptor, string> {
   const packageIdRegex = /^(@?[^@]+)(?:@(.+))?/;
   return pipe(

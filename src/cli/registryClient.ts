@@ -2,26 +2,26 @@ import { AX, T, Task } from '#lib/ts-belt-extra';
 import { HttpClient, HttpResponse, HttpTask } from '#types/httpClient.api';
 import { A, D, flow, O, pipe, S } from '@mobily/ts-belt';
 import { extractPackageIdFromIndexSource } from 'src/lib/packages';
-import { CodeText, GivenPackageId, Package, TypesResource } from 'src/types';
+import { CodeText, PackageSpecifier, Package, TypesResource } from 'src/types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
 export const REGISTRY_BASE_URL = `https://cdn.esm.sh`;
 
 export function initRegistryClient(httpClient: HttpClient) {
   return {
-    fetchPackage(givenPackageId: GivenPackageId): Task<Package, string> {
-      const packageURL = buildPackageUrl(givenPackageId);
+    fetchPackage(packageSpecifier: PackageSpecifier): Task<Package, string> {
+      const packageURL = buildPackageUrl(packageSpecifier);
       const responseTask = httpClient.get<string>(packageURL);
       const packageIdTask = pipe(
         responseTask,
-        T.flatMap(getData(`Package index file missing: ${givenPackageId}`)),
+        T.flatMap(getData(`Package index file missing: ${packageSpecifier}`)),
         T.map(CodeText.of),
         T.flatMap(flow(extractPackageIdFromIndexSource, T.fromResult)),
       );
 
       const typesResourceTask = buildTypesResource(
         responseTask,
-        givenPackageId,
+        packageSpecifier,
       );
 
       return T.zipWith(packageIdTask, typesResourceTask, Package.make);
@@ -30,7 +30,7 @@ export function initRegistryClient(httpClient: HttpClient) {
 
   function buildTypesResource(
     responseTask: HttpTask<string>,
-    givenPackageId: GivenPackageId,
+    packageSpecifier: PackageSpecifier,
   ) {
     const typesUrlTask = pipe(
       responseTask,
@@ -45,7 +45,7 @@ export function initRegistryClient(httpClient: HttpClient) {
     const typesTextTask = pipe(
       typesUrlTask,
       T.flatMap((typesUrl) => httpClient.get<string>(typesUrl)),
-      T.flatMap(getData(`Package types file missing: ${givenPackageId}`)),
+      T.flatMap(getData(`Package types file missing: ${packageSpecifier}`)),
       T.map(CodeText.of),
     );
 
@@ -53,8 +53,8 @@ export function initRegistryClient(httpClient: HttpClient) {
   }
 }
 
-function buildPackageUrl(givenPackageId: GivenPackageId) {
-  return `${REGISTRY_BASE_URL}/${givenPackageId}`;
+function buildPackageUrl(packageSpecifier: PackageSpecifier) {
+  return `${REGISTRY_BASE_URL}/${packageSpecifier}`;
 }
 
 const getData =

@@ -38,13 +38,13 @@ function parseCommandArgs(
     return R.Error(`Command not supported: "${action}"`);
   }
 
-  const packageIds = A.drop(args, 1);
-  if (packageIds.length === 0) {
+  const packageSpecifiers = A.drop(args, 1);
+  if (packageSpecifiers.length === 0) {
     return R.Error(`No package given! Usage: TODO`);
   }
 
   return R.Ok({
     action: action,
-    packageIds: packageIds,
+    packageSpecifiers: packageSpecifiers,
   });
 }

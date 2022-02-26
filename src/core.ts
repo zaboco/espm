@@ -6,7 +6,7 @@ import { initFilesManager } from './cli/filesManager';
 import { initRegistryClient } from './cli/registryClient';
 import { buildManifest } from './lib/manifest';
 import { packageDescriptorFromId } from './lib/packages';
-import { Command, GivenPackageId, PackageId } from './types';
+import { Command, PackageSpecifier, PackageId } from './types';
 
 interface Services {
   fs: Fs;
@@ -18,10 +18,10 @@ export function initManager(services: Services) {
   return {
     runCommand(command: Command): Task<unknown, string> {
       if (command.action === 'add') {
-        return commands.add(command.packageIds);
+        return commands.add(command.packageSpecifiers);
       }
       if (command.action === 'remove') {
-        return commands.remove(command.packageIds);
+        return commands.remove(command.packageSpecifiers);
       }
       return T.of(undefined);
     },
@@ -47,7 +47,7 @@ function buildCommands(services: Services) {
   }
 
   return {
-    add(packageIds: readonly GivenPackageId[]): Task<string, string> {
+    add(packageSpecifiers: readonly PackageSpecifier[]): Task<string, string> {
       // const writeManifestTask = pipe(
       //   fetchPackagesTask,
       //   T.map(A.map(D.getUnsafe('id'))),
@@ -55,7 +55,7 @@ function buildCommands(services: Services) {
       // );
 
       return pipe(
-        packageIds,
+        packageSpecifiers,
         A.map(
           flow(registryClient.fetchPackage, T.flatMap(filesManager.storeTypes)),
         ),
@@ -64,8 +64,8 @@ function buildCommands(services: Services) {
         // T.flatMap(() => writeManifestTask),
       );
     },
-    remove(packageIds: readonly GivenPackageId[]) {
-      return pipe(packageIds, A.map(filesManager.removeTypes), T.all);
+    remove(packageSpecifiers: readonly PackageSpecifier[]) {
+      return pipe(packageSpecifiers, A.map(filesManager.removeTypes), T.all);
     },
   };
 }
