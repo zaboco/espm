@@ -1,11 +1,11 @@
 import { AX, T, Task } from '#lib/ts-belt-extra';
 import { HttpClient, HttpResponse, HttpTask } from '#types/httpClient.api';
-import { A, D, flow, O, pipe, R, S } from '@mobily/ts-belt';
+import { A, D, O, pipe, R, Result, S } from '@mobily/ts-belt';
 import {
   extractPackageIdFromIndexSource,
   packageIdentifierFromId,
 } from 'src/lib/packages';
-import { CodeText, PackageSpecifier, Package, TypesResource } from 'src/types';
+import { CodeText, Package, PackageSpecifier, TypesResource } from 'src/types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
 export const REGISTRY_BASE_URL = `https://cdn.esm.sh`;
@@ -15,17 +15,20 @@ export function initRegistryClient(httpClient: HttpClient) {
     fetchPackage(packageSpecifier: PackageSpecifier): Task<Package, string> {
       const packageURL = buildPackageUrl(packageSpecifier);
       const responseTask = httpClient.get<string>(packageURL);
+
+      const getPackageIdentifierResult = (response: HttpResponse<string>) =>
+        pipe(
+          response,
+          getDataResult(`Package index file missing: ${packageSpecifier}`),
+          R.map(CodeText.of),
+          R.flatMap(extractPackageIdFromIndexSource),
+          R.flatMap(packageIdentifierFromId),
+        );
+
       const packageIdentifierTask = pipe(
         responseTask,
-        T.flatMap(getData(`Package index file missing: ${packageSpecifier}`)),
-        T.map(CodeText.of),
-        T.flatMap(
-          flow(
-            extractPackageIdFromIndexSource,
-            R.flatMap(packageIdentifierFromId),
-            T.fromResult,
-          ),
-        ),
+        T.map(getPackageIdentifierResult),
+        T.flatMap(T.fromResult),
       );
 
       const typesResourceTask = buildTypesResource(
@@ -70,6 +73,16 @@ const getData =
   <R, E>(errorValue: NonNullable<E>) =>
   (response: HttpResponse<R>): Task<R, E> =>
     pipe(response, D.get('data'), T.fromOption(errorValue));
+
+const getDataResult =
+  <R, E>(errorValue: NonNullable<E>) =>
+  (response: HttpResponse<R>): Result<R, E> =>
+    pipe(response, D.get('data'), R.fromNullable(errorValue));
+
+// const getOptionalData =
+//   <R, E>(errorValue: NonNullable<E>) =>
+//     (response: HttpResponse<R>): Task<R, E> =>
+//       pipe(response, D.get('data'), T.fromOption(errorValue));
 
 const getHeader =
   (header: string) =>
