@@ -2,8 +2,11 @@ import { T } from '#lib/ts-belt-extra';
 import { pipe } from '@mobily/ts-belt';
 import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
-import { MODULES_DIRECTORY_NAME } from '../src/cli/filesManager';
-import { REGISTRY_BASE_URL, TYPES_URL_HEADER } from '../src/cli/registryClient';
+import { MODULES_DIRECTORY_NAME } from '../src/core/filesManager';
+import {
+  REGISTRY_BASE_URL,
+  TYPES_URL_HEADER,
+} from '../src/core/registryClient';
 import { initManager } from '../src/core';
 import { expectToEqual } from './__helpers__/assertions';
 import {
