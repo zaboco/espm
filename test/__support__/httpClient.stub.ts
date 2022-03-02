@@ -19,6 +19,7 @@ export function initHttpClientStub(
         httpTasks,
         D.get(url),
         O.getWithDefault(T.rejected(`URL not covered: [${url}]`)),
+        T.map((r) => ({ ...r, url })),
         (t) => t as HttpTask<R>,
       );
     },

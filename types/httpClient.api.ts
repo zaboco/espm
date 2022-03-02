@@ -3,6 +3,7 @@ import { IncomingHttpHeaders } from 'http';
 
 export interface HttpResponse<T> {
   headers: IncomingHttpHeaders;
+  url?: string;
   data: T;
 }
 

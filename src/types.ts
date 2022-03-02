@@ -34,6 +34,10 @@ export const Package = {
   },
 };
 
+export type NewCodeText = string & { __tag: 'CodeText' };
+export const makeNewCodeText = (text: string): NewCodeText =>
+  text as NewCodeText;
+
 export type CodeText = Id<'CodeText', string>;
 
 export const CodeText = factory<'CodeText', string>('CodeText');
