@@ -7,7 +7,7 @@ import {
   Resource,
   Resources,
 } from 'src/registry/registry.types';
-import { makeNewCodeText, PackageSpecifier } from 'src/types';
+import { CodeTexts, PackageSpecifier } from 'src/shared/shared.types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
 export const REGISTRY_BASE_URL = `https://cdn.esm.sh`;
@@ -24,7 +24,7 @@ export function initRegistryClient(httpClient: HttpClient) {
       const indexSourceTask = pipeTask(
         indexResponseTask,
         getData,
-        makeNewCodeText,
+        CodeTexts.make,
       );
 
       const typesResourceTask = buildTypedefResource(indexResponseTask);
@@ -50,7 +50,7 @@ export function initRegistryClient(httpClient: HttpClient) {
       typedefUrlTask,
       (typesUrl) => httpClient.get<string>(typesUrl),
       getData,
-      makeNewCodeText,
+      CodeTexts.make,
     );
 
     return T.zipWith(typedefUrlTask, typedefCodeTask, Resources.make);

@@ -2,11 +2,12 @@ import { T, Task } from '#lib/ts-belt-extra';
 import { Fs } from '#types/fs.api';
 import { HttpClient } from '#types/httpClient.api';
 import { A, flow, pipe } from '@mobily/ts-belt';
+import { PackageFullName, PackageSpecifier } from 'src/shared/shared.types';
 import { initFilesManager } from './core/filesManager';
 import { initRegistryClient } from './core/registryClient';
 import { buildManifest } from './lib/manifest';
 import { packageIdentifierFromId } from './lib/packages';
-import { Command, PackageId, PackageSpecifier } from './types';
+import { Command } from './types';
 
 interface Services {
   fs: Fs;
@@ -34,7 +35,7 @@ function buildCommands(services: Services) {
 
   // @ts-expect-error NOT used for now
   function writeManifest(
-    packageIds: readonly PackageId[],
+    packageIds: readonly PackageFullName[],
   ): Task<string, string> {
     return pipe(
       packageIds,

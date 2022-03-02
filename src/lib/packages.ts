@@ -1,12 +1,12 @@
 import { T, Task } from '#lib/ts-belt-extra';
 import { A, O, pipe, S } from '@mobily/ts-belt';
 import {
-  CodeText,
-  PackageSpecifier,
+  PackageFullName,
   PackageIdentifier,
-  PackageId,
   PackageName,
-} from 'src/types';
+  PackageSpecifier,
+} from 'src/shared/shared.types';
+import { CodeText } from 'src/types';
 
 export function packageNameFromSpecifier(
   packageSpecifier: PackageSpecifier,
@@ -26,7 +26,7 @@ export function packageNameFromSpecifier(
  */
 export function extractPackageIdFromIndexSource(
   packageIndexSource: CodeText,
-): Task<PackageId, string> {
+): Task<PackageFullName, string> {
   const esmHeaderRegex = /^\/\* esm.sh - (.+) \*\/$/;
 
   return pipe(

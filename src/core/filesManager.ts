@@ -3,7 +3,8 @@ import { Fs } from '#types/fs.api';
 import { F, pipe } from '@mobily/ts-belt';
 import path from 'node:path';
 import { packageNameFromSpecifier } from 'src/lib/packages';
-import { CodeText, PackageSpecifier, Manifest, Package } from 'src/types';
+import { PackageSpecifier } from 'src/shared/shared.types';
+import { CodeText, Manifest, Package } from 'src/types';
 
 export const MODULES_DIRECTORY_NAME = 'es-modules';
 const MANIFEST_FILE_NAME = 'es-modules.json';

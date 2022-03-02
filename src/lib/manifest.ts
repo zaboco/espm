@@ -1,5 +1,6 @@
 import { A, D, pipe } from '@mobily/ts-belt';
-import { Manifest, PackageIdentifier } from 'src/types';
+import { PackageIdentifier } from 'src/shared/shared.types';
+import { Manifest } from 'src/types';
 
 export function buildManifest(
   identifiers: readonly PackageIdentifier[],

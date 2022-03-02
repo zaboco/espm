@@ -5,12 +5,8 @@ import {
   extractPackageIdFromIndexSource,
   packageIdentifierFromId,
 } from 'src/lib/packages';
-import {
-  CodeText,
-  Package,
-  PackageSpecifier,
-  TypedefResource,
-} from 'src/types';
+import { PackageSpecifier } from 'src/shared/shared.types';
+import { CodeText, Package, TypedefResource } from 'src/types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
 export const REGISTRY_BASE_URL = `https://cdn.esm.sh`;
