@@ -1,13 +1,13 @@
-import { AX, pipeTask, T, Task } from '#lib/ts-belt-extra';
-import { HttpClient, HttpResponse, HttpTask } from '#types/httpClient.api';
+import { CodeTexts, PackageSpecifier } from '#main/shared/types';
+import { AX, pipeTask, T, Task } from '#ts-belt-extra';
+import { HttpClient, HttpResponse, HttpTask } from '#interfaces/httpClient.api';
 import { A, D, O, pipe } from '@mobily/ts-belt';
 import {
   RegistryPackage,
   RegistryPackages,
   Resource,
   Resources,
-} from 'src/registry/registry.types';
-import { CodeTexts, PackageSpecifier } from 'src/shared/shared.types';
+} from './types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
 export const REGISTRY_BASE_URL = `https://cdn.esm.sh`;

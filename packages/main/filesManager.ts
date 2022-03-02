@@ -1,13 +1,12 @@
-import { pipeTask, SX, T, Task } from '#lib/ts-belt-extra';
-import { Fs } from '#types/fs.api';
+import { FsClient } from '#interfaces/fsClient.api';
+import { packageNameFromSpecifier } from '#main/lib/packages';
+import { PackageSpecifier } from '#main/shared/types';
+import { Package } from '#main/types';
+import { pipeTask, SX, Task } from '#ts-belt-extra';
 import { F, pipe } from '@mobily/ts-belt';
 import path from 'node:path';
-import { packageNameFromSpecifier } from 'src/lib/packages';
-import { PackageSpecifier } from 'src/shared/shared.types';
-import { CodeText, Manifest, Package } from 'src/types';
 
 export const MODULES_DIRECTORY_NAME = 'es-modules';
-const MANIFEST_FILE_NAME = 'es-modules.json';
 const DEPS_DIRECTORY_NAME = '.deps';
 
 const logger = {
@@ -17,7 +16,7 @@ const logger = {
   },
 };
 
-export function initFilesManager(fs: Fs) {
+export function initFilesManager(fsClient: FsClient) {
   return {
     storeTypes: (pkg: Package): Task<string, string> => {
       const realPath = path.join(
@@ -30,8 +29,8 @@ export function initFilesManager(fs: Fs) {
       );
 
       return pipeTask(
-        fs.writeFile(realPath, CodeText.unwrap(pkg.typedef.text)),
-        () => fs.symlink(realPath, aliasPath),
+        fsClient.writeFile(realPath, pkg.typedef.text),
+        () => fsClient.symlink(realPath, aliasPath),
         F.tap((fileName) => {
           logger.info('Wrote types file:', fileName);
         }),
@@ -42,20 +41,11 @@ export function initFilesManager(fs: Fs) {
       pipeTask(
         packageNameFromSpecifier(packageSpecifier),
         SX.prepend(`${MODULES_DIRECTORY_NAME}/`),
-        fs.rmdir,
+        fsClient.rmdir,
         (v) => v,
         F.tap((dirName) => {
           logger.info('Removed directory:', dirName);
         }),
       ),
-
-    writeManifest: (manifest: Manifest): Task<string, string> => {
-      return pipe(
-        fs.writeFile(MANIFEST_FILE_NAME, JSON.stringify(manifest, null, 2)),
-        T.tap((manifestName) => {
-          logger.info('Created manifest file:', manifestName);
-        }),
-      );
-    },
   };
 }

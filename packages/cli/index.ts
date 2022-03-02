@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 
-import { safeFs } from '#lib/safe-fs';
-import { httpieClient } from '#lib/safe-http-client';
-import { GX, T } from '#lib/ts-belt-extra';
+import { initManager } from '#main/index';
+import { Command } from '#main/types';
+import { nodeFsClient, httpieClient } from '#services';
+import { GX, T } from '#ts-belt-extra';
 import { A, pipe, R, Result } from '@mobily/ts-belt';
-import { initManager } from './core';
-import { Command } from './types';
 
 main(process.argv.slice(2));
 
 function main(programArgs: ReadonlyArray<string>) {
   const manager = initManager({
-    fs: safeFs,
+    fsClient: nodeFsClient,
     httpClient: httpieClient,
   });
   pipe(

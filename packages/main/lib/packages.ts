@@ -1,12 +1,12 @@
-import { T, Task } from '#lib/ts-belt-extra';
+import { T, Task } from '#ts-belt-extra';
 import { A, O, pipe, S } from '@mobily/ts-belt';
 import {
   PackageFullName,
   PackageIdentifier,
   PackageName,
   PackageSpecifier,
-} from 'src/shared/shared.types';
-import { CodeText } from 'src/types';
+  CodeText,
+} from '#main/shared/types';
 
 export function packageNameFromSpecifier(
   packageSpecifier: PackageSpecifier,
@@ -31,7 +31,6 @@ export function extractPackageIdFromIndexSource(
 
   return pipe(
     packageIndexSource,
-    CodeText.unwrap,
     S.trim,
     S.split('\n'),
     A.head,

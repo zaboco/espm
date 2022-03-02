@@ -1,7 +1,7 @@
-import { HttpClient, HttpTask } from '#types/httpClient.api';
+import { HttpClient, HttpTask } from '#interfaces/httpClient.api';
+import { SX, T } from '#ts-belt-extra';
 import { G, pipe } from '@mobily/ts-belt';
 import * as httpie from 'httpie';
-import { SX, T } from './ts-belt-extra';
 
 export const httpieClient: HttpClient = {
   get<R>(url: string): HttpTask<R> {

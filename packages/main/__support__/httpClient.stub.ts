@@ -1,5 +1,5 @@
-import { T } from '#lib/ts-belt-extra';
-import { HttpClient, HttpTask } from '#types/httpClient.api';
+import { T } from '#ts-belt-extra';
+import { HttpClient, HttpTask } from '#interfaces/httpClient.api';
 import { D, O, pipe } from '@mobily/ts-belt';
 
 interface HttpClientStub extends HttpClient {

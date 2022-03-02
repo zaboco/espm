@@ -1,12 +1,12 @@
-import { AX, pipeTask, T, Task } from '#lib/ts-belt-extra';
-import { HttpClient, HttpResponse, HttpTask } from '#types/httpClient.api';
-import { A, D, O, pipe, S } from '@mobily/ts-belt';
 import {
   extractPackageIdFromIndexSource,
   packageIdentifierFromId,
-} from 'src/lib/packages';
-import { PackageSpecifier } from 'src/shared/shared.types';
-import { CodeText, Package, TypedefResource } from 'src/types';
+} from '#main/lib/packages';
+import { CodeTexts, PackageSpecifier } from '#main/shared/types';
+import { Package, TypedefResource } from '#main/types';
+import { AX, pipeTask, T, Task } from '#ts-belt-extra';
+import { HttpClient, HttpResponse, HttpTask } from '#interfaces/httpClient.api';
+import { A, D, O, pipe, S } from '@mobily/ts-belt';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
 export const REGISTRY_BASE_URL = `https://cdn.esm.sh`;
@@ -20,7 +20,7 @@ export function initRegistryClient(httpClient: HttpClient) {
       const packageIdentifierTask = pipeTask(
         responseTask,
         getData(`Package index file missing: ${packageSpecifier}`),
-        CodeText.of,
+        CodeTexts.make,
         extractPackageIdFromIndexSource,
         packageIdentifierFromId,
       );
@@ -49,7 +49,7 @@ export function initRegistryClient(httpClient: HttpClient) {
       typesUrlTask,
       (typesUrl) => httpClient.get<string>(typesUrl),
       getData(`Package types file missing: ${packageSpecifier}`),
-      CodeText.of,
+      CodeTexts.make,
     );
 
     return T.zipWith(typesRelativeUrlTask, typesTextTask, TypedefResource.make);

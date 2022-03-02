@@ -1,11 +1,11 @@
-import { T } from '#lib/ts-belt-extra';
-import { pipe } from '@mobily/ts-belt';
-import { expectToEqual } from 'test/__helpers__/assertions';
+import { initHttpClientStub } from '#main/__support__/httpClient.stub';
+import { expectToEqual } from '#test-helpers/assertions';
 import {
   assertTaskError,
   assertTaskSuccess,
-} from 'test/__helpers__/taskAssertions';
-import { initHttpClientStub } from 'test/__support__/httpClient.stub';
+} from '#test-helpers/taskAssertions';
+import { T } from '#ts-belt-extra';
+import { pipe } from '@mobily/ts-belt';
 import { suite } from 'uvu';
 import {
   initRegistryClient,

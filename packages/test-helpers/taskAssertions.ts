@@ -1,4 +1,4 @@
-import { Task } from '#lib/ts-belt-extra';
+import { Task } from '#ts-belt-extra';
 import * as assert from 'uvu/assert';
 
 export const assertTaskSuccess =

@@ -1,5 +1,5 @@
-import { T } from '#lib/ts-belt-extra';
-import { FilePath, Fs } from '#types/fs.api';
+import { FilePath, FsClient } from '#interfaces/fsClient.api';
+import { T } from '#ts-belt-extra';
 
 type FsAction =
   | { type: 'rm'; path: FilePath }
@@ -7,11 +7,11 @@ type FsAction =
   | { type: 'symlink'; target: FilePath; path: FilePath }
   | { type: 'writeFile'; path: FilePath; contents: string };
 
-interface FsSpy extends Fs {
+interface FsClientSpy extends FsClient {
   getPerformedActions(): FsAction[];
 }
 
-export function initFsSpy(): FsSpy {
+export function initFsClientSpy(): FsClientSpy {
   const actions: FsAction[] = [];
   return {
     rm(filePath) {

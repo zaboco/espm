@@ -1,20 +1,17 @@
-import { T } from '#lib/ts-belt-extra';
-import { pipe } from '@mobily/ts-belt';
-import { suite } from 'uvu';
-import * as assert from 'uvu/assert';
-import { MODULES_DIRECTORY_NAME } from '../src/core/filesManager';
-import {
-  REGISTRY_BASE_URL,
-  TYPES_URL_HEADER,
-} from '../src/core/registryClient';
-import { initManager } from '../src/core';
-import { expectToEqual } from './__helpers__/assertions';
+import { initFsClientSpy } from '#main/__support__/fs.spy';
+import { initHttpClientStub } from '#main/__support__/httpClient.stub';
+import { MODULES_DIRECTORY_NAME } from '#main/filesManager';
+import { initManager } from '#main/index';
+import { REGISTRY_BASE_URL, TYPES_URL_HEADER } from '#main/registryClient';
+import { expectToEqual } from '#test-helpers/assertions';
 import {
   assertTaskError,
   assertTaskSuccess,
-} from './__helpers__/taskAssertions';
-import { initFsSpy } from './__support__/fs.spy';
-import { initHttpClientStub } from './__support__/httpClient.stub';
+} from '#test-helpers/taskAssertions';
+import { T } from '#ts-belt-extra';
+import { pipe } from '@mobily/ts-belt';
+import { suite } from 'uvu';
+import * as assert from 'uvu/assert';
 
 const test = suite('e2e');
 
@@ -26,7 +23,7 @@ test('it writes types to disk if they are found', () => {
   `;
   const typesSource = 'whatever';
 
-  const fsSpy = initFsSpy();
+  const fsSpy = initFsClientSpy();
   const typesUrl = `https://cdn.esm.sh/${typesRelativePath}`;
   const httpClientStub = initHttpClientStub({
     [`${REGISTRY_BASE_URL}/${packageId}`]: T.of({
@@ -42,7 +39,7 @@ test('it writes types to disk if they are found', () => {
   });
 
   const manager = initManager({
-    fs: fsSpy,
+    fsClient: fsSpy,
     httpClient: httpClientStub,
   });
 
@@ -73,7 +70,7 @@ test('it fails if the package source header is not valid', () => {
 `;
 
   const manager = initManager({
-    fs: initFsSpy(),
+    fsClient: initFsClientSpy(),
     httpClient: initHttpClientStub({
       [`${REGISTRY_BASE_URL}/whatever`]: T.of({
         data: invalidPackageSource,
@@ -94,7 +91,7 @@ test('it fails if the package source header is not valid', () => {
 test('it fails if there is a registry error', () => {
   const registryError = 'Not found';
   const manager = initManager({
-    fs: initFsSpy(),
+    fsClient: initFsClientSpy(),
     httpClient: initHttpClientStub({
       [`${REGISTRY_BASE_URL}/whatever`]: T.rejected(registryError),
     }),

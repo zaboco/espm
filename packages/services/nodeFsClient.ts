@@ -1,10 +1,10 @@
-import { FilePath, Fs } from '#types/fs.api';
+import { FilePath, FsClient } from '#interfaces/fsClient.api';
+import { pipeTask, T, Task } from '#ts-belt-extra';
 import { pipe } from '@mobily/ts-belt';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { pipeTask, T, Task } from './ts-belt-extra';
 
-export const safeFs: Fs = {
+export const nodeFsClient: FsClient = {
   writeFile(filePath, fileContents) {
     const dirPath = path.dirname(filePath);
     return pipeTask(mkdir(dirPath), () => writeFile(filePath, fileContents));

@@ -1,4 +1,4 @@
-import { CodeText } from 'src/shared/shared.types';
+import { CodeText } from '#main/shared/types';
 
 export interface Resource {
   url: string;

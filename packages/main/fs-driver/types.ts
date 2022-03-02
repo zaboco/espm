@@ -1,4 +1,4 @@
-import { FilePath } from '#types/fs.api';
+import { FilePath } from '#interfaces/fsClient.api';
 
 export type FsAction =
   | { type: 'writeFile'; path: FilePath; contents: string }

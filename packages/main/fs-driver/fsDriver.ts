@@ -1,9 +1,9 @@
-import { T, Task } from '#lib/ts-belt-extra';
-import { FilePath, Fs, FsError } from '#types/fs.api';
+import { T, Task } from '#ts-belt-extra';
+import { FilePath, FsClient, FsError } from '#interfaces/fsClient.api';
 import { A, pipe } from '@mobily/ts-belt';
-import { FsAction } from 'src/fs-driver/types';
+import { FsAction } from './types';
 
-export function initFsDriver(fs: Fs) {
+export function initFsDriver(fs: FsClient) {
   return {
     perform: performAction,
     performSequence(actions: FsAction[]): Task<readonly FilePath[], FsError> {

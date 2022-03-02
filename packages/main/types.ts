@@ -1,10 +1,8 @@
-import { factory, Id } from '#lib/ts-belt-extra/Id';
 import {
+  CodeText,
   PackageIdentifier,
-  PackageName,
   PackageSpecifier,
-  PackageVersion,
-} from 'src/shared/shared.types';
+} from '#main/shared/types';
 
 export type Command = AddCommand | RemoveCommand;
 
@@ -39,11 +37,3 @@ export const Package = {
     return { identifier: identifier, typedef: typedef };
   },
 };
-
-export type CodeText = Id<'CodeText', string>;
-
-export const CodeText = factory<'CodeText', string>('CodeText');
-
-export interface Manifest {
-  dependencies: Record<PackageName, PackageVersion>;
-}
