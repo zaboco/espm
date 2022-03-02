@@ -12,25 +12,25 @@ export interface RemoveCommand {
   packageSpecifiers: readonly PackageSpecifier[];
 }
 
-export interface TypesResource {
+export interface TypedefResource {
   relativeUrl: string;
   text: CodeText;
 }
 
 export interface Package {
   identifier: PackageIdentifier;
-  types: TypesResource;
+  typedef: TypedefResource;
 }
 
-export const TypesResource = {
-  make(relativeUrl: string, text: CodeText): TypesResource {
+export const TypedefResource = {
+  make(relativeUrl: string, text: CodeText): TypedefResource {
     return { relativeUrl, text };
   },
 };
 
 export const Package = {
-  make(identifier: PackageIdentifier, types: TypesResource): Package {
-    return { identifier: identifier, types };
+  make(identifier: PackageIdentifier, typedef: TypedefResource): Package {
+    return { identifier: identifier, typedef: typedef };
   },
 };
 

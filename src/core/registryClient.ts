@@ -5,7 +5,12 @@ import {
   extractPackageIdFromIndexSource,
   packageIdentifierFromId,
 } from 'src/lib/packages';
-import { CodeText, Package, PackageSpecifier, TypesResource } from 'src/types';
+import {
+  CodeText,
+  Package,
+  PackageSpecifier,
+  TypedefResource,
+} from 'src/types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
 export const REGISTRY_BASE_URL = `https://cdn.esm.sh`;
@@ -36,7 +41,7 @@ export function initRegistryClient(httpClient: HttpClient) {
   function buildTypesResource(
     responseTask: HttpTask<string>,
     packageSpecifier: PackageSpecifier,
-  ) {
+  ): Task<TypedefResource, string> {
     const typesUrlTask = pipeTask(responseTask, getHeader(TYPES_URL_HEADER));
 
     const typesRelativeUrlTask = pipeTask(
@@ -51,11 +56,11 @@ export function initRegistryClient(httpClient: HttpClient) {
       CodeText.of,
     );
 
-    return T.zipWith(typesRelativeUrlTask, typesTextTask, TypesResource.make);
+    return T.zipWith(typesRelativeUrlTask, typesTextTask, TypedefResource.make);
   }
 }
 
-function buildPackageUrl(packageSpecifier: PackageSpecifier) {
+function buildPackageUrl(packageSpecifier: PackageSpecifier): string {
   return `${REGISTRY_BASE_URL}/${packageSpecifier}`;
 }
 

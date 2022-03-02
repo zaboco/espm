@@ -22,14 +22,14 @@ export function initFilesManager(fs: Fs) {
       const realPath = path.join(
         MODULES_DIRECTORY_NAME,
         DEPS_DIRECTORY_NAME,
-        pkg.types.relativeUrl,
+        pkg.typedef.relativeUrl,
       );
       const aliasPath = pipe(pkg.identifier.name, (pkgName) =>
         path.join(MODULES_DIRECTORY_NAME, pkgName, 'index.d.ts'),
       );
 
       return pipeTask(
-        fs.writeFile(realPath, CodeText.unwrap(pkg.types.text)),
+        fs.writeFile(realPath, CodeText.unwrap(pkg.typedef.text)),
         () => fs.symlink(realPath, aliasPath),
         F.tap((fileName) => {
           logger.info('Wrote types file:', fileName);
