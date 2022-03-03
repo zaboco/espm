@@ -26,13 +26,3 @@ export function packageIdentifierFromSpecifier(
     R.fromFalsy(`Package specifier is invalid: ${packageId}`),
   );
 }
-
-export function packageNameFromSpecifier(
-  packageSpecifier: PackageSpecifier,
-): Result<PackageName, string> {
-  return pipe(
-    packageSpecifier,
-    packageIdentifierFromSpecifier,
-    R.map((d) => d.name),
-  );
-}

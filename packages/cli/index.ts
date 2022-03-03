@@ -33,7 +33,7 @@ function parseCommandArgs(
   args: ReadonlyArray<string>,
 ): Result<Command, string> {
   const action = A.at(args, 0);
-  if (!GX.isOneOf(action, ['add', 'remove'] as const)) {
+  if (!GX.isOneOf(action, ['add'] as const)) {
     return R.Error(`Command not supported: "${action}"`);
   }
 

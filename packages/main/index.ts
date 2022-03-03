@@ -19,9 +19,6 @@ export function initManager(services: Services) {
       if (command.action === 'add') {
         return commands.add(command.packageSpecifiers);
       }
-      if (command.action === 'remove') {
-        return commands.remove(command.packageSpecifiers);
-      }
       return T.of(undefined);
     },
   };
@@ -42,9 +39,6 @@ function buildCommands(services: Services) {
         ),
         T.all,
       );
-    },
-    remove(packageSpecifiers: readonly PackageSpecifier[]) {
-      return pipe(packageSpecifiers, A.map(filesManager.removeTypes), T.all);
     },
   };
 }

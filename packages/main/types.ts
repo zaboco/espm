@@ -1,15 +1,10 @@
 import { PackageIdentifier, PackageSpecifier } from '#main/shared/packages';
 import { CodeText } from '#main/shared/codeText';
 
-export type Command = AddCommand | RemoveCommand;
+export type Command = AddCommand;
 
 export interface AddCommand {
   action: 'add';
-  packageSpecifiers: readonly PackageSpecifier[];
-}
-
-export interface RemoveCommand {
-  action: 'remove';
   packageSpecifiers: readonly PackageSpecifier[];
 }
 

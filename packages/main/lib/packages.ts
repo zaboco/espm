@@ -1,22 +1,11 @@
 import {
   PackageFullName,
   PackageIdentifier,
-  PackageName,
   PackageSpecifier,
 } from '#main/shared/packages';
 import { T, Task } from '#ts-belt-extra';
 import { A, O, pipe, S } from '@mobily/ts-belt';
 import { CodeText } from '#main/shared/codeText';
-
-export function packageNameFromSpecifier(
-  packageSpecifier: PackageSpecifier,
-): Task<PackageName, string> {
-  return pipe(
-    packageSpecifier,
-    packageIdentifierFromId,
-    T.map((d) => d.name),
-  );
-}
 
 /**
  * esm.sh files have a comment in the header:
