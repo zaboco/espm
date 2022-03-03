@@ -2,7 +2,8 @@ import {
   extractPackageIdFromIndexSource,
   packageIdentifierFromId,
 } from '#main/lib/packages';
-import { CodeTexts, PackageSpecifier } from '#main/shared/types';
+import { PackageSpecifier } from '#main/shared/packages';
+import { CodeTexts } from '#main/shared/codeText';
 import { Package, TypedefResource } from '#main/types';
 import { AX, pipeTask, T, Task } from '#ts-belt-extra';
 import { HttpClient, HttpResponse, HttpTask } from '#interfaces/httpClient.api';

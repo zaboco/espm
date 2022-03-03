@@ -1,12 +1,12 @@
-import { T, Task } from '#ts-belt-extra';
-import { A, O, pipe, S } from '@mobily/ts-belt';
 import {
   PackageFullName,
   PackageIdentifier,
   PackageName,
   PackageSpecifier,
-  CodeText,
-} from '#main/shared/types';
+} from '#main/shared/packages';
+import { T, Task } from '#ts-belt-extra';
+import { A, O, pipe, S } from '@mobily/ts-belt';
+import { CodeText } from '#main/shared/codeText';
 
 export function packageNameFromSpecifier(
   packageSpecifier: PackageSpecifier,

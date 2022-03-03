@@ -1,6 +1,6 @@
 import { FsClient } from '#interfaces/fsClient.api';
 import { packageNameFromSpecifier } from '#main/lib/packages';
-import { PackageSpecifier } from '#main/shared/types';
+import { PackageSpecifier } from '#main/shared/packages';
 import { Package } from '#main/types';
 import { pipeTask, SX, Task } from '#ts-belt-extra';
 import { F, pipe } from '@mobily/ts-belt';

@@ -1,12 +1,12 @@
-import { CodeText } from '#main/shared/types';
+import { CodeText } from '#main/shared/codeText';
 
-export interface Resource {
+export interface RegistryResource {
   url: string;
   code: CodeText;
 }
 
 export const Resources = {
-  make(url: string, code: CodeText): Resource {
+  make(url: string, code: CodeText): RegistryResource {
     return { url, code };
   },
 };
@@ -14,14 +14,14 @@ export const Resources = {
 export interface RegistryPackage {
   originalUrl: string;
   indexSource: CodeText;
-  typedef: Resource;
+  typedef: RegistryResource;
 }
 
 export const RegistryPackages = {
   make(
     originalUrl: string,
     indexSource: CodeText,
-    typedef: Resource,
+    typedef: RegistryResource,
   ): RegistryPackage {
     return { originalUrl, indexSource, typedef };
   },

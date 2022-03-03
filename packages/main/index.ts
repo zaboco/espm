@@ -1,6 +1,6 @@
 import { initFilesManager } from '#main/filesManager';
 import { initRegistryClient } from '#main/registryClient';
-import { PackageSpecifier } from '#main/shared/types';
+import { PackageSpecifier } from '#main/shared/packages';
 import { Command } from '#main/types';
 import { T, Task } from '#ts-belt-extra';
 import { FsClient } from '#interfaces/fsClient.api';

@@ -1,16 +1,17 @@
-import { CodeTexts, PackageSpecifier } from '#main/shared/types';
-import { AX, pipeTask, T, Task } from '#ts-belt-extra';
 import { HttpClient, HttpResponse, HttpTask } from '#interfaces/httpClient.api';
+import { buildPackageIndexUrl } from '#main/registry/url';
+import { PackageSpecifier } from '#main/shared/packages';
+import { CodeTexts } from '#main/shared/codeText';
+import { AX, pipeTask, T, Task } from '#ts-belt-extra';
 import { A, D, O, pipe } from '@mobily/ts-belt';
 import {
   RegistryPackage,
   RegistryPackages,
-  Resource,
+  RegistryResource,
   Resources,
 } from './types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
-export const REGISTRY_BASE_URL = `https://cdn.esm.sh`;
 
 export function initRegistryClient(httpClient: HttpClient) {
   return {
@@ -40,7 +41,7 @@ export function initRegistryClient(httpClient: HttpClient) {
 
   function buildTypedefResource(
     indexResponseTask: HttpTask<string>,
-  ): Task<Resource, string> {
+  ): Task<RegistryResource, string> {
     const typedefUrlTask = pipeTask(
       indexResponseTask,
       getHeader(TYPES_URL_HEADER),
@@ -55,10 +56,6 @@ export function initRegistryClient(httpClient: HttpClient) {
 
     return T.zipWith(typedefUrlTask, typedefCodeTask, Resources.make);
   }
-}
-
-function buildPackageIndexUrl(packageSpecifier: PackageSpecifier): string {
-  return `${REGISTRY_BASE_URL}/${packageSpecifier}`;
 }
 
 const getData = <R>(response: HttpResponse<R>): Task<R, string> =>

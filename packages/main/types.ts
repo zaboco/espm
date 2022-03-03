@@ -1,8 +1,5 @@
-import {
-  CodeText,
-  PackageIdentifier,
-  PackageSpecifier,
-} from '#main/shared/types';
+import { PackageIdentifier, PackageSpecifier } from '#main/shared/packages';
+import { CodeText } from '#main/shared/codeText';
 
 export type Command = AddCommand | RemoveCommand;
 

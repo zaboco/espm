@@ -1,4 +1,5 @@
 import { initHttpClientStub } from '#main/__support__/httpClient.stub';
+import { REGISTRY_BASE_URL } from '#main/registry/url';
 import { expectToEqual } from '#test-helpers/assertions';
 import {
   assertTaskError,
@@ -7,11 +8,7 @@ import {
 import { T } from '#ts-belt-extra';
 import { pipe } from '@mobily/ts-belt';
 import { suite } from 'uvu';
-import {
-  initRegistryClient,
-  REGISTRY_BASE_URL,
-  TYPES_URL_HEADER,
-} from './registryClient';
+import { initRegistryClient, TYPES_URL_HEADER } from './registryClient';
 
 const test = suite('registryClient');
 
