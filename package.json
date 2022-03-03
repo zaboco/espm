@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "description": "ES Package Manager",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "uvu -r esbuild-runner/register packages .test.ts",
+    "test:watch": "FORCE_COLOR=1 watchlist -e packages -- npm test",
+    "tw": "FORCE_COLOR=1 watchlist -e packages -- esr"
+  },
   "keywords": [],
   "author": "zaboco@gmail.com",
   "license": "MIT",
