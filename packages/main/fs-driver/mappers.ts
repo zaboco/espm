@@ -1,5 +1,5 @@
+import { Package } from '#main/core/types';
 import { FsAction } from '#main/fs-driver/types';
-import { Package } from '#main/types';
 import path from 'node:path';
 
 export const MODULES_DIRECTORY_NAME = 'es-modules';
@@ -9,7 +9,7 @@ export function packageToFsActions(pkg: Package): FsAction[] {
   const realPath = path.join(
     MODULES_DIRECTORY_NAME,
     DEPS_DIRECTORY_NAME,
-    pkg.typedef.relativeUrl,
+    pkg.typedef.path,
   );
 
   const aliasPath = path.join(
@@ -22,8 +22,8 @@ export function packageToFsActions(pkg: Package): FsAction[] {
     {
       type: 'sequence',
       actions: [
-        { type: 'writeFile', path: realPath, contents: pkg.typedef.text },
-        { type: 'symlink', from: realPath, to: aliasPath },
+        { type: 'writeFile', path: realPath, contents: pkg.typedef.code },
+        { type: 'symlink', from: aliasPath, to: realPath },
       ],
     },
   ];

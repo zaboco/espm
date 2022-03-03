@@ -1,11 +1,13 @@
-import { initFilesManager } from '#main/filesManager';
-import { initRegistryClient } from '#main/registryClient';
+import { initFsDriver } from '#main/fs-driver/fsDriver';
+import { packageToFsActions } from '#main/fs-driver/mappers';
+import { toPackage } from '#main/registry/mappers';
+import { initRegistryClient } from '#main/registry/registryClient';
 import { PackageSpecifier } from '#main/shared/packages';
 import { Command } from '#main/types';
-import { T, Task } from '#ts-belt-extra';
+import { pipeTask, T, Task } from '#ts-belt-extra';
 import { FsClient } from '#interfaces/fsClient.api';
 import { HttpClient } from '#interfaces/httpClient.api';
-import { A, flow, pipe } from '@mobily/ts-belt';
+import { A, pipe } from '@mobily/ts-belt';
 
 interface Services {
   fsClient: FsClient;
@@ -25,20 +27,21 @@ export function initManager(services: Services) {
 }
 
 function buildCommands(services: Services) {
-  const filesManager = initFilesManager(services.fsClient);
+  const fsDriver = initFsDriver(services.fsClient);
   const registryClient = initRegistryClient(services.httpClient);
 
+  const addOne = (pkgSpecifier: PackageSpecifier): Task<unknown, string> =>
+    pipeTask(
+      T.of(pkgSpecifier),
+      registryClient.fetchPackage,
+      toPackage,
+      packageToFsActions,
+      fsDriver.performInParallel,
+    );
+
   return {
-    add(
-      packageSpecifiers: readonly PackageSpecifier[],
-    ): Task<string[], string> {
-      return pipe(
-        packageSpecifiers,
-        A.map(
-          flow(registryClient.fetchPackage, T.flatMap(filesManager.storeTypes)),
-        ),
-        T.all,
-      );
+    add(packageSpecifiers: readonly PackageSpecifier[]): Task<unknown, string> {
+      return pipe(packageSpecifiers, A.map(addOne), T.all);
     },
   };
 }

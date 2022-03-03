@@ -7,11 +7,10 @@ import {
   packageIdentifierFromSpecifier,
 } from '#main/shared/packages';
 import { CodeText } from '#main/shared/codeText';
+import { T, Task } from '#ts-belt-extra';
 import { A, O, pipe, R, Result, S } from '@mobily/ts-belt';
 
-export function toPackage(
-  registryPkg: RegistryPackage,
-): Result<Package, string> {
+export function toPackage(registryPkg: RegistryPackage): Task<Package, string> {
   return pipe(
     registryPkg.indexSource,
     pkgIdentifierFromIndexSource,
@@ -19,6 +18,7 @@ export function toPackage(
       identifier,
       typedef: toTypedef(registryPkg.typedef),
     })),
+    T.fromResult,
   );
 }
 
