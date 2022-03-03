@@ -18,7 +18,7 @@ export function initFsDriver(fs: FsClient) {
       case 'writeFile':
         return fs.writeFile(action.path, action.contents);
       case 'symlink':
-        return fs.symlink(action.target, action.path);
+        return fs.symlink(action.to, action.from);
     }
   }
 }
