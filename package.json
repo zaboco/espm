@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "@mobily/ts-belt": "3.9.0",
-    "httpie": "1.1.2"
+    "chalk": "2.4.2",
+    "httpie": "1.1.2",
+    "spinnies": "0.5.1"
   }
 }
