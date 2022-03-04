@@ -1,8 +1,8 @@
-import { HttpClient, HttpResponse, HttpTask } from '#interfaces/httpClient.api';
+import { HttpClient, HttpResponse } from '#interfaces/httpClient.api';
 import { buildPackageIndexUrl } from '#main/registry/url';
-import { PackageSpecifier } from '#main/shared/packages';
 import { CodeTexts } from '#main/shared/codeText';
-import { AX, pipeTask, T, Task } from '#ts-belt-extra';
+import { PackageSpecifier } from '#main/shared/packages';
+import { AX, T, Task } from '#ts-belt-extra';
 import { A, D, O, pipe } from '@mobily/ts-belt';
 import {
   RegistryPackage,
@@ -22,39 +22,44 @@ export function initRegistryClient(httpClient: HttpClient) {
 
       const indexResponseTask = httpClient.get<string>(packageIndexURL);
 
-      const indexSourceTask = pipeTask(
+      return pipe(
         indexResponseTask,
-        getData,
-        CodeTexts.make,
-      );
-
-      const typesResourceTask = buildTypedefResource(indexResponseTask);
-
-      return T.zipWith(
-        indexSourceTask,
-        typesResourceTask,
-        (indexSource, typedef) =>
-          RegistryPackages.make(packageIndexURL, indexSource, typedef),
+        T.flatMap((response) =>
+          pipe(
+            response,
+            getData,
+            T.map(CodeTexts.make),
+            T.flatMap((source) =>
+              pipe(
+                response,
+                buildTypedefResourceSimple,
+                T.map((resource) =>
+                  RegistryPackages.make(packageIndexURL, source, resource),
+                ),
+              ),
+            ),
+          ),
+        ),
       );
     },
   };
 
-  function buildTypedefResource(
-    indexResponseTask: HttpTask<string>,
+  function buildTypedefResourceSimple(
+    indexResponse: HttpResponse<string>,
   ): Task<RegistryResource, string> {
-    const typedefUrlTask = pipeTask(
-      indexResponseTask,
+    return pipe(
+      indexResponse,
       getHeader(TYPES_URL_HEADER),
+      T.flatMap((typedefUrl) => {
+        return pipe(
+          typedefUrl,
+          (typedefUrl) => httpClient.get<string>(typedefUrl),
+          T.flatMap(getData),
+          T.map(CodeTexts.make),
+          T.map((code) => Resources.make(typedefUrl, code)),
+        );
+      }),
     );
-
-    const typedefCodeTask = pipeTask(
-      typedefUrlTask,
-      (typesUrl) => httpClient.get<string>(typesUrl),
-      getData,
-      CodeTexts.make,
-    );
-
-    return T.zipWith(typedefUrlTask, typedefCodeTask, Resources.make);
   }
 }
 

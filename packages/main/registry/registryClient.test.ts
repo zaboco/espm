@@ -5,7 +5,7 @@ import {
   assertTaskError,
   assertTaskSuccess,
 } from '#test-helpers/taskAssertions';
-import { T } from '#ts-belt-extra';
+import { T, Task } from '#ts-belt-extra';
 import { pipe } from '@mobily/ts-belt';
 import { suite } from 'uvu';
 import { initRegistryClient, TYPES_URL_HEADER } from './registryClient';
@@ -48,13 +48,13 @@ test('returns package definition for valid package', () => {
   const pkg = generatePackageFixture();
 
   const httpClientStub = initHttpClientStub({
-    [pkg.indexUrl]: T.of({
+    [pkg.indexUrl]: okOnce(`GET ${pkg.indexUrl}`, {
       data: pkg.indexSource,
       headers: {
         [TYPES_URL_HEADER]: pkg.typedefUrl,
       },
     }),
-    [pkg.typedefUrl]: T.of({
+    [pkg.typedefUrl]: okOnce(`GET ${pkg.typedefUrl}`, {
       data: pkg.typedefSource,
       headers: {},
     }),
@@ -130,5 +130,17 @@ test('returns error when types header not present', () => {
     assertTaskError((e) => expectToEqual(e, expectedError)),
   );
 });
+
+function okOnce<R>(name: string, r: R): Task<R, string> {
+  let callsCount = 0;
+  return T.make((rej, res) => {
+    callsCount++;
+    if (callsCount === 1) {
+      res(r);
+    } else {
+      rej(`Task ${name} called more than once!`);
+    }
+  });
+}
 
 test.run();
