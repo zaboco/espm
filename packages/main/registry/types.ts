@@ -18,11 +18,11 @@ export interface RegistryPackage {
 }
 
 export const RegistryPackages = {
-  make(
-    originalUrl: string,
-    indexSource: CodeText,
-    typedef: RegistryResource,
-  ): RegistryPackage {
+  make<RP extends RegistryPackage>({
+    indexSource,
+    typedef,
+    originalUrl,
+  }: RP): RegistryPackage {
     return { originalUrl, indexSource, typedef };
   },
 };

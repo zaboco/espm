@@ -16,6 +16,42 @@ export const fork =
     task.fork(onRej, onRes);
   };
 
+export const bindTo =
+  <N extends string>(name: N) =>
+  <R, E>(task: Task<R, E>): Task<{ readonly [K in N]: R }, E> =>
+    pipe(
+      task,
+      map((r) => ({ [name]: r } as any)),
+    );
+
+/*
+export declare const bind: <N, A, B>(
+  name: Exclude<N, keyof A>,
+  f: (a: A) => Option<B>
+) => (ma: Option<A>) => Option<{ readonly [K in N | keyof A]: K extends keyof A ? A[K] : B }>
+
+
+ return (name, f) => (ma) => M.chain(ma, (a) => M.map(f(a), (b) => Object.assign({}, a, { [name]: b }) as any))
+ */
+
+export const bind =
+  <N extends string, A, R, E>(
+    name: Exclude<N, keyof A>,
+    fn: (a: A) => Task<R, E>,
+  ) =>
+  (
+    task: Task<A, E>,
+  ): Task<{ readonly [K in N | keyof A]: K extends keyof A ? A[K] : R }, E> =>
+    pipe(
+      task,
+      flatMap((a) =>
+        pipe(
+          fn(a),
+          map((r) => Object.assign({}, a, { [name]: r } as any)),
+        ),
+      ),
+    );
+
 export const run =
   <R, E>(onRes: (r: R) => void) =>
   (task: Task<R, E>): void =>

@@ -1,15 +1,10 @@
 import { HttpClient, HttpResponse } from '#interfaces/httpClient.api';
 import { buildPackageIndexUrl } from '#main/registry/url';
-import { CodeTexts } from '#main/shared/codeText';
+import { CodeText, CodeTexts } from '#main/shared/codeText';
 import { PackageSpecifier } from '#main/shared/packages';
-import { AX, T, Task } from '#ts-belt-extra';
+import { AX, pipeTask, T, Task } from '#ts-belt-extra';
 import { A, D, O, pipe } from '@mobily/ts-belt';
-import {
-  RegistryPackage,
-  RegistryPackages,
-  RegistryResource,
-  Resources,
-} from './types';
+import { RegistryPackage, RegistryPackages, RegistryResource } from './types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
 
@@ -18,28 +13,19 @@ export function initRegistryClient(httpClient: HttpClient) {
     fetchPackage(
       packageSpecifier: PackageSpecifier,
     ): Task<RegistryPackage, string> {
-      const packageIndexURL = buildPackageIndexUrl(packageSpecifier);
-
-      const indexResponseTask = httpClient.get<string>(packageIndexURL);
-
       return pipe(
-        indexResponseTask,
-        T.flatMap((response) =>
-          pipe(
-            response,
-            getData,
-            T.map(CodeTexts.make),
-            T.flatMap((source) =>
-              pipe(
-                response,
-                buildTypedefResource,
-                T.map((resource) =>
-                  RegistryPackages.make(packageIndexURL, source, resource),
-                ),
-              ),
-            ),
-          ),
+        T.of<string, string>(buildPackageIndexUrl(packageSpecifier)),
+        T.bindTo('originalUrl'),
+        T.bind('indexResponse', ({ originalUrl }) =>
+          httpClient.get<string>(originalUrl),
         ),
+        T.bind('indexSource', ({ indexResponse }) =>
+          getCodeData(indexResponse),
+        ),
+        T.bind('typedef', ({ indexResponse }) =>
+          buildTypedefResource(indexResponse),
+        ),
+        T.map(RegistryPackages.make),
       );
     },
   };
@@ -50,24 +36,20 @@ export function initRegistryClient(httpClient: HttpClient) {
     return pipe(
       indexResponse,
       getHeader(TYPES_URL_HEADER),
-      T.flatMap((typedefUrl) => {
-        return pipe(
-          typedefUrl,
-          (typedefUrl) => httpClient.get<string>(typedefUrl),
-          T.flatMap(getData),
-          T.map(CodeTexts.make),
-          T.map((code) => Resources.make(typedefUrl, code)),
-        );
-      }),
+      T.bindTo('url'),
+      T.bind('code', ({ url }) =>
+        pipeTask(httpClient.get<string>(url), getCodeData),
+      ),
     );
   }
 }
 
-const getData = <R>(response: HttpResponse<R>): Task<R, string> =>
+const getCodeData = (response: HttpResponse<string>): Task<CodeText, string> =>
   pipe(
     response,
     D.getUnsafe('data'),
     O.fromFalsy,
+    O.map(CodeTexts.make),
     T.fromOption(`No data found for url: ${response.url}`),
   );
 
