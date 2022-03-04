@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
+import { logger } from '#logger';
 import { initManager } from '#main/index';
 import { Command } from '#main/types';
 import { nodeFsClient, httpieClient } from '#services';
 import { GX, T } from '#ts-belt-extra';
 import { A, pipe, R, Result } from '@mobily/ts-belt';
 
+logger.setLevel('DEBUG');
 main(process.argv.slice(2));
 
 function main(programArgs: ReadonlyArray<string>) {
@@ -20,10 +22,11 @@ function main(programArgs: ReadonlyArray<string>) {
     T.flatMap(manager.runCommand),
     T.fork(
       (err) => {
-        console.error('Error:', err);
+        logger.error(err);
+        process.exit(1);
       },
       () => {
-        console.log('Success!');
+        logger.info('Done!');
       },
     ),
   );

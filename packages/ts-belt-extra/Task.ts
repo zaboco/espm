@@ -106,6 +106,14 @@ export const tap = <R, E>(fn: (r: R) => void) =>
     return r;
   });
 
+export const tapError =
+  <R, E>(fn: (e: E) => void) =>
+  (task: Task<R, E>) =>
+    mapError<R, E, E>((e) => {
+      fn(e);
+      return e;
+    })(task);
+
 export const fromPromise = <R, E>(
   thunk: () => Promise<R>,
   errorMapper: (err: any) => E,

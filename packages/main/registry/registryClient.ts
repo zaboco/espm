@@ -1,4 +1,5 @@
 import { HttpClient, HttpResponse } from '#interfaces/httpClient.api';
+import { logger } from '#logger';
 import { buildPackageIndexUrl } from '#main/registry/url';
 import { CodeText, CodeTexts } from '#main/shared/codeText';
 import { PackageSpecifier } from '#main/shared/packages';
@@ -23,7 +24,12 @@ export function initRegistryClient(httpClient: HttpClient) {
           getCodeData(indexResponse),
         ),
         T.bind('typedef', ({ indexResponse }) =>
-          buildTypedefResource(indexResponse),
+          pipe(
+            buildTypedefResource(indexResponse),
+            T.tapError(() => {
+              logger.warn(`Types not found: ${packageSpecifier}`);
+            }),
+          ),
         ),
         T.map(RegistryPackages.make),
       );
