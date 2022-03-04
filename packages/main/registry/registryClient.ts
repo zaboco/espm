@@ -32,7 +32,7 @@ export function initRegistryClient(httpClient: HttpClient) {
             T.flatMap((source) =>
               pipe(
                 response,
-                buildTypedefResourceSimple,
+                buildTypedefResource,
                 T.map((resource) =>
                   RegistryPackages.make(packageIndexURL, source, resource),
                 ),
@@ -44,7 +44,7 @@ export function initRegistryClient(httpClient: HttpClient) {
     },
   };
 
-  function buildTypedefResourceSimple(
+  function buildTypedefResource(
     indexResponse: HttpResponse<string>,
   ): Task<RegistryResource, string> {
     return pipe(
