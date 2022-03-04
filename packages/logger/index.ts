@@ -18,31 +18,33 @@ export interface Logger {
 }
 
 interface LogOptions {
-  level?: LogLevel;
+  level: LogLevel;
 }
 
 type Color = 'white' | 'blue' | 'yellow' | 'red' | 'black';
 
 export type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
+type LogThreshold = LogLevel | 'NONE';
+
+const DEFAULT_THRESHOLD_LEVEL = 'NONE';
+const SPINNER_LEVEL = 'DEBUG';
 
 export const logger = initLogger();
 
-const DEFAULT_LEVEL = 'INFO';
-const SPINNER_LEVEL = 'DEBUG';
-
-function isLevelAboveThreshold(level: LogLevel, thresholdLevel: LogLevel) {
-  const levelScores: Record<LogLevel, number> = {
+function isLevelAboveThreshold(level: LogLevel, thresholdLevel: LogThreshold) {
+  const levelScores: Record<LogThreshold, number> = {
     DEBUG: 0,
     INFO: 1,
     WARN: 2,
     ERROR: 3,
+    NONE: 4,
   };
 
   return levelScores[level] >= levelScores[thresholdLevel];
 }
 
 export function initLogger(
-  initialThresholdLevel: LogLevel = DEFAULT_LEVEL,
+  initialThresholdLevel: LogThreshold = DEFAULT_THRESHOLD_LEVEL,
 ): Logger {
   const spinnies = new Spinnies();
   let thresholdLevel = initialThresholdLevel;
@@ -88,8 +90,8 @@ export function initLogger(
     },
   };
 
-  function log(message: string, options: LogOptions = {}) {
-    const level = options.level ?? DEFAULT_LEVEL;
+  function log(message: string, options: LogOptions) {
+    const level = options.level ?? DEFAULT_THRESHOLD_LEVEL;
     if (!isLevelAboveThreshold(level, thresholdLevel)) {
       return;
     }
