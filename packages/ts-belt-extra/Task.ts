@@ -93,6 +93,13 @@ export const zipWith = <R1, R2, O, _E>(
     ),
   );
 
+export const recover =
+  <R, E>(defaultValue: R) =>
+  (task: Task<R, E>): Task<R, E> =>
+    make((_rej, res) => {
+      task.fork(() => res(defaultValue), res);
+    });
+
 export const mapError =
   <_R, E, F>(fn: (r: E) => F) =>
   (task: Task<_R, E>): Task<_R, F> =>

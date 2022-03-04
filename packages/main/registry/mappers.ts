@@ -1,14 +1,14 @@
-import { Package } from '#main/core/types';
+import { Package, Resource } from '#main/core/types';
 import { RegistryPackage, RegistryResource } from '#main/registry/types';
 import { relativePathFromUrl } from '#main/registry/url';
+import { CodeText, CodeTexts } from '#main/shared/codeText';
 import {
   PackageFullName,
   PackageIdentifier,
   packageIdentifierFromSpecifier,
 } from '#main/shared/packages';
-import { CodeText } from '#main/shared/codeText';
 import { T, Task } from '#ts-belt-extra';
-import { A, O, pipe, R, Result, S } from '@mobily/ts-belt';
+import { A, O, Option, pipe, R, Result, S } from '@mobily/ts-belt';
 
 export function toPackage(registryPkg: RegistryPackage): Task<Package, string> {
   return pipe(
@@ -16,16 +16,30 @@ export function toPackage(registryPkg: RegistryPackage): Task<Package, string> {
     pkgIdentifierFromIndexSource,
     R.map((identifier) => ({
       identifier,
-      typedef: toTypedef(registryPkg.typedef),
+      typedef: pipe(
+        registryPkg.typedef,
+        toTypedef,
+        O.getWithDefault(generateTypedefStub(identifier)),
+      ),
     })),
     T.fromResult,
   );
 }
 
-function toTypedef(typedef: RegistryResource) {
+function toTypedef(typedefOption: Option<RegistryResource>): Option<Resource> {
+  return pipe(
+    typedefOption,
+    O.map((typedef) => ({
+      code: typedef.code,
+      path: relativePathFromUrl(typedef.url),
+    })),
+  );
+}
+
+function generateTypedefStub({ name, version }: PackageIdentifier): Resource {
   return {
-    code: typedef.code,
-    path: relativePathFromUrl(typedef.url),
+    path: `/generated/${name}@${version}/index.d.ts`,
+    code: CodeTexts.make(`declare module '${name}';`),
   };
 }
 

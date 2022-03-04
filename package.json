@@ -6,7 +6,8 @@
   "scripts": {
     "test": "uvu -r esbuild-runner/register -C packages",
     "test:watch": "FORCE_COLOR=1 watchlist -e packages -- npm test",
-    "tw": "FORCE_COLOR=1 watchlist -e packages -- esr"
+    "tw": "FORCE_COLOR=1 watchlist -e packages -- esr",
+    "twd": "FORCE_COLOR=1 watchlist -e packages -- uvu -r esbuild-runner/register -C"
   },
   "keywords": [],
   "author": "zaboco@gmail.com",

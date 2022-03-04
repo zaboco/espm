@@ -1,4 +1,5 @@
 import { CodeText } from '#main/shared/codeText';
+import { Option } from '@mobily/ts-belt';
 
 export interface RegistryResource {
   url: string;
@@ -14,7 +15,7 @@ export const Resources = {
 export interface RegistryPackage {
   originalUrl: string;
   indexSource: CodeText;
-  typedef: RegistryResource;
+  typedef: Option<RegistryResource>;
 }
 
 export const RegistryPackages = {

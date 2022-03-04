@@ -4,7 +4,7 @@ import { buildPackageIndexUrl } from '#main/registry/url';
 import { CodeText, CodeTexts } from '#main/shared/codeText';
 import { PackageSpecifier } from '#main/shared/packages';
 import { AX, pipeTask, T, Task } from '#ts-belt-extra';
-import { A, D, O, pipe } from '@mobily/ts-belt';
+import { A, D, O, Option, pipe } from '@mobily/ts-belt';
 import { RegistryPackage, RegistryPackages, RegistryResource } from './types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
@@ -27,8 +27,11 @@ export function initRegistryClient(httpClient: HttpClient) {
           pipe(
             buildTypedefResource(indexResponse),
             T.tapError(() => {
-              logger.warn(`Types not found: ${packageSpecifier}`);
+              logger.warn(
+                `[${packageSpecifier}] Types not found! Generating stub index.d.ts`,
+              );
             }),
+            T.recover<Option<RegistryResource>, string>(O.None),
           ),
         ),
         T.map(RegistryPackages.make),

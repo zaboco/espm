@@ -1,14 +1,15 @@
 import { initHttpClientStub } from '#main/__support__/httpClient.stub';
 import { REGISTRY_BASE_URL } from '#main/registry/url';
+import { CodeTexts } from '#main/shared/codeText';
 import { expectToEqual } from '#test-helpers/assertions';
 import {
   assertTaskError,
   assertTaskSuccess,
 } from '#test-helpers/taskAssertions';
 import { T, Task } from '#ts-belt-extra';
-import { pipe } from '@mobily/ts-belt';
+import { O, pipe } from '@mobily/ts-belt';
 import { suite } from 'uvu';
-import { initRegistryClient, TYPES_URL_HEADER } from './registryClient';
+import { initRegistryClient, TYPES_URL_HEADER } from '../registryClient';
 
 const test = suite('registryClient');
 
@@ -29,11 +30,11 @@ function generatePackageFixture(
   const defaultDescriptor: PackageDescriptor = {
     specifier: 'react',
     indexSource: '/* esm.sh - react@17.0.2 */',
-    typedefUrl: 'https://cdn.esm.sh/v66/@types/react@17.0.39/index.d.ts',
+    typedefUrl: `${REGISTRY_BASE_URL}/v66/@types/react@17.0.39/index.d.ts`,
     typedefSource: "declare module 'react';",
   };
 
-  const descriptor = {
+  const descriptor: PackageDescriptor = {
     ...defaultDescriptor,
     ...customDescriptor,
   };
@@ -67,11 +68,11 @@ test('returns package definition for valid package', () => {
     assertTaskSuccess((r) =>
       expectToEqual(r, {
         originalUrl: pkg.indexUrl,
-        indexSource: pkg.indexSource,
-        typedef: {
+        indexSource: CodeTexts.make(pkg.indexSource),
+        typedef: O.Some({
           url: pkg.typedefUrl,
-          code: pkg.typedefSource,
-        },
+          code: CodeTexts.make(pkg.typedefSource),
+        }),
       }),
     ),
   );
@@ -112,9 +113,8 @@ test('returns error when package source is empty', () => {
   );
 });
 
-test('returns error when types header not present', () => {
+test('returns None typedef when types header not present', () => {
   const pkg = generatePackageFixture();
-  const expectedError = `Header ${TYPES_URL_HEADER} not found`;
 
   const httpClientStub = initHttpClientStub({
     [pkg.indexUrl]: T.of({
@@ -127,7 +127,13 @@ test('returns error when types header not present', () => {
 
   pipe(
     registryClient.fetchPackage(pkg.specifier),
-    assertTaskError((e) => expectToEqual(e, expectedError)),
+    assertTaskSuccess((r) =>
+      expectToEqual(r, {
+        originalUrl: pkg.indexUrl,
+        indexSource: CodeTexts.make(pkg.indexSource),
+        typedef: O.None,
+      }),
+    ),
   );
 });
 
