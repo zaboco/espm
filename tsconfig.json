@@ -23,7 +23,7 @@
       "#main/*": ["packages/main/*"],
       "#interfaces/*": ["packages/interfaces/*"],
       "#services": ["packages/services/index.ts"],
-      "#logger": ["packages/logger/index.ts"],
+      "#logger/*": ["packages/logger/*"],
       "#ts-belt-extra": ["packages/ts-belt-extra/index.ts"],
       "#test-helpers/*": ["packages/test-helpers/*"]
     }

@@ -1,5 +1,5 @@
 import { HttpClient, HttpResponse } from '#interfaces/httpClient.api';
-import { logger } from '#logger';
+import { logger } from '#logger/index';
 import { buildPackageIndexUrl } from '#main/registry/url';
 import { CodeText, CodeTexts } from '#main/shared/codeText';
 import { PackageSpecifier } from '#main/shared/packages';

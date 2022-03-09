@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { logger } from '#logger';
+import { logger } from '#logger/index';
 import { initManager } from '#main/index';
 import { Command } from '#main/types';
 import { nodeFsClient, httpieClient } from '#services';
@@ -23,7 +23,7 @@ function main(programArgs: ReadonlyArray<string>) {
     T.fork(
       (err) => {
         logger.error(err);
-        process.exit(1);
+        process.exitCode = 1;
       },
       () => {
         logger.info('Done!');
