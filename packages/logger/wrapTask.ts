@@ -8,7 +8,7 @@ export const wrapTask =
       const spinner = logger.spinner(message);
       return T.fork<R, E>(
         (e) => {
-          spinner.fail();
+          spinner.fail(String(e));
           rej(e);
         },
         (r) => {

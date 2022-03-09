@@ -6,7 +6,7 @@ import Spinnies from 'spinnies';
 export interface Logger {
   spinner(message: string): {
     succeed: () => void;
-    fail: () => void;
+    fail: (message: string) => void;
   };
   log(message: string, options?: LogOptions): void;
   debug(message: string): void;
@@ -67,8 +67,10 @@ export function initLogger(
         succeed() {
           spinnies.succeed(spinnerId);
         },
-        fail() {
-          spinnies.fail(spinnerId);
+        fail(message: string) {
+          spinnies.fail(spinnerId, {
+            text: formatMessage(message, SPINNER_LEVEL),
+          });
         },
       };
     },
