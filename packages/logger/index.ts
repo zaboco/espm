@@ -65,7 +65,9 @@ export function initLogger(
 
       return {
         succeed() {
-          spinnies.succeed(spinnerId);
+          spinnies.succeed(spinnerId, {
+            succeedColor: 'black',
+          });
         },
         fail(message: string) {
           spinnies.fail(spinnerId, {
@@ -119,7 +121,7 @@ function getTextColor(level: LogLevel): Color {
 
 function formatMessage(message: string, level: LogLevel): string {
   const bgColor = level === 'DEBUG' ? 'white' : getTextColor(level);
-  return chalk.black[bgColor].inverse(` ${level.padStart(5)} `) + ' ' + message;
+  return chalk[bgColor].inverse(` ${level.padStart(5)} `) + ' ' + message;
 }
 
 function uuid(base: string) {
