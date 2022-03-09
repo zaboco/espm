@@ -1,5 +1,5 @@
 import { HttpClient, HttpTask } from '#interfaces/httpClient.api';
-import { wrapTask } from '#logger/wrapTask';
+import { logTask } from '#logger/logTask';
 import { SX, T } from '#ts-belt-extra';
 import { G, pipe } from '@mobily/ts-belt';
 import * as httpie from 'httpie';
@@ -16,7 +16,7 @@ export const httpieClient: HttpClient = {
           );
         },
       ),
-      wrapTask(`GET ${url}`),
+      logTask(`GET ${url}`),
     );
   },
 };

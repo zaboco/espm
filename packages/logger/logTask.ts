@@ -1,7 +1,7 @@
 import { T, Task } from '#ts-belt-extra';
 import { logger } from './index';
 
-export const wrapTask =
+export const logTask =
   (message: string) =>
   <R, E>(task: Task<R, E>): Task<R, E> =>
     T.make((rej, res) => {
