@@ -72,6 +72,7 @@ test('returns package definition for valid package', () => {
         typedef: O.Some({
           url: pkg.typedefUrl,
           code: CodeTexts.make(pkg.typedefSource),
+          imports: [],
         }),
       }),
     ),

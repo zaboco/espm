@@ -4,11 +4,12 @@ import { Option } from '@mobily/ts-belt';
 export interface RegistryResource {
   url: string;
   code: CodeText;
+  imports: RegistryResource[];
 }
 
 export const Resources = {
-  make(url: string, code: CodeText): RegistryResource {
-    return { url, code };
+  make<RR extends RegistryResource>({ url, code }: RR): RegistryResource {
+    return { url, code, imports: [] };
   },
 };
 

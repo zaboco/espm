@@ -49,6 +49,7 @@ export function initRegistryClient(httpClient: HttpClient) {
       T.bind('code', ({ url }) =>
         pipeTask(httpClient.get<string>(url), getCodeData),
       ),
+      T.bind('imports', () => T.of([])),
     );
   }
 }

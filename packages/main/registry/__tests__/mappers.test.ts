@@ -48,6 +48,7 @@ function genValidFixtureWithTypedef() {
     typedef: O.Some({
       url: `${REGISTRY_BASE_URL}${typedef.path}`,
       code: typedef.code,
+      imports: [],
     }),
   };
 
