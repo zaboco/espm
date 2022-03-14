@@ -10,6 +10,7 @@ import { T, Task } from '#ts-belt-extra';
 import { O, pipe } from '@mobily/ts-belt';
 import { suite } from 'uvu';
 import { initRegistryClient, TYPES_URL_HEADER } from '../registryClient';
+import * as esModuleLexer from 'es-module-lexer';
 
 const test = suite('registryClient');
 
@@ -45,6 +46,8 @@ function generatePackageFixture(
   };
 }
 
+test.before(() => esModuleLexer.init);
+
 test('returns package definition for valid package', () => {
   const pkg = generatePackageFixture();
 
@@ -73,6 +76,59 @@ test('returns package definition for valid package', () => {
           url: pkg.typedefUrl,
           code: CodeTexts.make(pkg.typedefSource),
           imports: [],
+        }),
+      }),
+    ),
+  );
+});
+
+test('extracts imports from the code', () => {
+  const importedUrl = `https://cdn.esm.sh/v66/csstype@3.0.10/index.d.ts`;
+  const pkg = generatePackageFixture({
+    typedefSource: `
+import * as CSS from '${importedUrl}';
+declare module 'react';    
+`,
+  });
+  const importedSource = "declare module 'css';";
+
+  const httpClientStub = initHttpClientStub({
+    [pkg.indexUrl]: okOnce(`GET ${pkg.indexUrl}`, {
+      data: pkg.indexSource,
+      headers: {
+        [TYPES_URL_HEADER]: pkg.typedefUrl,
+      },
+    }),
+    [pkg.typedefUrl]: okOnce(`GET ${pkg.typedefUrl}`, {
+      data: pkg.typedefSource,
+      headers: {},
+    }),
+    [importedUrl]: okOnce(`GET ${importedUrl}`, {
+      data: importedSource,
+      headers: {},
+    }),
+  });
+
+  const registryClient = initRegistryClient(httpClientStub);
+
+  console.log('='.repeat(20));
+
+  pipe(
+    registryClient.fetchPackage(pkg.specifier),
+    assertTaskSuccess((r) =>
+      expectToEqual(r, {
+        originalUrl: pkg.indexUrl,
+        indexSource: CodeTexts.make(pkg.indexSource),
+        typedef: O.Some({
+          url: pkg.typedefUrl,
+          code: CodeTexts.make(pkg.typedefSource),
+          imports: [
+            {
+              url: importedUrl,
+              code: CodeTexts.make(importedSource),
+              imports: [],
+            },
+          ],
         }),
       }),
     ),
