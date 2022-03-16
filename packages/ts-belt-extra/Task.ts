@@ -10,6 +10,11 @@ export const of = <R, _E>(r: R): Task<R, _E> =>
     res(r);
   });
 
+// export const of2 = <E>() => <R, _E>(r: R): Task<R, _E> =>
+//   make((_rej, res) => {
+//     res(r);
+//   });
+
 export const fork =
   <R, E>(onRej: (e: E) => void, onRes: (r: R) => void) =>
   (task: Task<R, E>): void => {

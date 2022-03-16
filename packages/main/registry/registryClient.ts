@@ -5,9 +5,13 @@ import { CodeText, CodeTexts } from '#main/shared/codeText';
 import { PackageSpecifier } from '#main/shared/packages';
 import { AX, pipeTask, T, Task } from '#ts-belt-extra';
 import { A, D, O, Option, pipe } from '@mobily/ts-belt';
-import { ImportSpecifier } from 'es-module-lexer';
-import { RegistryPackage, RegistryPackages, RegistryResource } from './types';
 import * as esModuleLexer from 'es-module-lexer';
+import {
+  RegistryPackage,
+  RegistryPackages,
+  RegistryResource,
+  TopLevelResource,
+} from './types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
 
@@ -33,17 +37,18 @@ export function initRegistryClient(httpClient: HttpClient) {
                 `[${packageSpecifier}] Types not found! Generating stub index.d.ts`,
               );
             }),
-            T.recover<Option<RegistryResource>, string>(O.None),
+            T.recover<Option<TopLevelResource>, string>(O.None),
           ),
         ),
         T.map(RegistryPackages.make),
       );
     },
+    traverseImports,
   };
 
   function buildTypedefResource(
     indexResponse: HttpResponse<string>,
-  ): Task<RegistryResource, string> {
+  ): Task<TopLevelResource, string> {
     return pipe(
       indexResponse,
       getHeader(TYPES_URL_HEADER),
@@ -51,35 +56,87 @@ export function initRegistryClient(httpClient: HttpClient) {
       T.bind('code', ({ url }) =>
         pipeTask(httpClient.get<string>(url), getCodeData),
       ),
-      T.bind('imports', ({ code }) => extractImports(code)),
+      T.bind('imports', ({ code, url }) =>
+        // need to drop the first import, since it's the top-level import itself
+        pipeTask(traverseResourceImports({ code, url }, []), A.drop(1)),
+      ),
     );
   }
 
-  function extractImports(
-    code: CodeText,
+  function traverseImports(
+    url: string,
+    alreadyVisitedUrls: readonly string[],
+  ): Task<readonly RegistryResource[], string> {
+    if (alreadyVisitedUrls.includes(url)) {
+      return T.of<readonly RegistryResource[], string>([]);
+    }
+
+    return pipe(
+      fetchResource(url),
+      T.flatMap((r) => traverseResourceImports(r, alreadyVisitedUrls)),
+    );
+  }
+
+  function traverseResourceImports(
+    resource: RegistryResource,
+    alreadyVisitedUrls: readonly string[],
   ): Task<readonly RegistryResource[], string> {
     return pipe(
-      code,
-      esModuleLexer.parse,
-      ([imports]) => imports,
-      A.map(buildImportResource),
-      T.all,
+      resource.code,
+      extractImports,
+      A.reduce(
+        T.of<
+          {
+            newResources: readonly RegistryResource[];
+            accAlreadyVisitedUrls: readonly string[];
+          },
+          string
+        >({
+          newResources: [resource],
+          accAlreadyVisitedUrls: alreadyVisitedUrls.concat(resource.url),
+        }),
+        (accTask, importUrl) => {
+          const importedResourcesTask = pipe(
+            accTask,
+            T.flatMap(({ accAlreadyVisitedUrls }) =>
+              traverseImports(importUrl, accAlreadyVisitedUrls),
+            ),
+          );
+
+          return T.zipWith(
+            importedResourcesTask,
+            accTask,
+            (importedResources, { newResources, accAlreadyVisitedUrls }) => {
+              return {
+                newResources: newResources.concat(importedResources),
+                accAlreadyVisitedUrls: accAlreadyVisitedUrls.concat(
+                  importedResources.map((r) => r.url),
+                ),
+              };
+            },
+          );
+        },
+      ),
+      T.map((acc) => acc.newResources),
     );
   }
 
-  function buildImportResource(
-    importSpecifier: ImportSpecifier,
-  ): Task<RegistryResource, string> {
-    return pipe(
-      importSpecifier.n,
-      T.fromOption(`Invalid import: ${importSpecifier}`),
-      T.bindTo('url'),
-      T.bind('code', ({ url }) =>
-        pipeTask(httpClient.get<string>(url), getCodeData),
-      ),
-      T.bind('imports', () => T.of([])),
-    );
+  function fetchResource(url: string): Task<RegistryResource, string> {
+    return pipeTask(httpClient.get<string>(url), getCodeData, (code) => ({
+      code,
+      url: url,
+    }));
   }
+}
+
+function extractImports(code: CodeText): readonly string[] {
+  return pipe(
+    code,
+    esModuleLexer.parse,
+    ([imports]) => imports,
+    A.map(D.getUnsafe('n')),
+    AX.rejectNullables,
+  );
 }
 
 const getCodeData = (response: HttpResponse<string>): Task<CodeText, string> =>

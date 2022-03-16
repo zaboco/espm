@@ -8,9 +8,9 @@ import {
 } from '#test-helpers/taskAssertions';
 import { T, Task } from '#ts-belt-extra';
 import { O, pipe } from '@mobily/ts-belt';
+import * as esModuleLexer from 'es-module-lexer';
 import { suite } from 'uvu';
 import { initRegistryClient, TYPES_URL_HEADER } from '../registryClient';
-import * as esModuleLexer from 'es-module-lexer';
 
 const test = suite('registryClient');
 
@@ -84,23 +84,16 @@ test('returns package definition for valid package', () => {
 
 test('extracts imports from the code', () => {
   const importedUrl = `https://cdn.esm.sh/v66/csstype@3.0.10/index.d.ts`;
-  const pkg = generatePackageFixture({
-    typedefSource: `
-import * as CSS from '${importedUrl}';
-declare module 'react';    
-`,
-  });
   const importedSource = "declare module 'css';";
 
+  const topLevelUrl = 'top-level-url';
+  const topLevelSource = `
+import * as CSS from '${importedUrl}';
+declare module 'react';    
+`;
   const httpClientStub = initHttpClientStub({
-    [pkg.indexUrl]: okOnce(`GET ${pkg.indexUrl}`, {
-      data: pkg.indexSource,
-      headers: {
-        [TYPES_URL_HEADER]: pkg.typedefUrl,
-      },
-    }),
-    [pkg.typedefUrl]: okOnce(`GET ${pkg.typedefUrl}`, {
-      data: pkg.typedefSource,
+    [topLevelUrl]: okOnce(`GET ${topLevelUrl}`, {
+      data: topLevelSource,
       headers: {},
     }),
     [importedUrl]: okOnce(`GET ${importedUrl}`, {
@@ -111,26 +104,129 @@ declare module 'react';
 
   const registryClient = initRegistryClient(httpClientStub);
 
-  console.log('='.repeat(20));
+  pipe(
+    registryClient.traverseImports(topLevelUrl, []),
+    assertTaskSuccess((r) =>
+      expectToEqual(r, [
+        {
+          url: topLevelUrl,
+          code: CodeTexts.make(topLevelSource),
+        },
+        { url: importedUrl, code: CodeTexts.make(importedSource) },
+      ]),
+    ),
+  );
+});
+
+test('extracts imports from the code, even if nested', () => {
+  const secondLevelImportUrl = `second-level-import-url`;
+  const secondLevelSource = `
+declare module 'second-level-import';
+`;
+
+  const firstLevelImportUrl = `first-level-import-url`;
+  const firstLevelSource = `
+import from '${secondLevelImportUrl}';
+declare module 'first-level-import';
+`;
+
+  const topLevelUrl = 'top-level-url';
+  const topLevelSource = `
+import * as CSS from '${firstLevelImportUrl}';
+declare module 'react';    
+`;
+  const httpClientStub = initHttpClientStub({
+    [topLevelUrl]: okOnce(`GET ${topLevelUrl}`, {
+      data: topLevelSource,
+      headers: {},
+    }),
+    [firstLevelImportUrl]: okOnce(`GET ${firstLevelImportUrl}`, {
+      data: firstLevelSource,
+      headers: {},
+    }),
+    [secondLevelImportUrl]: okOnce(`GET ${secondLevelImportUrl}`, {
+      data: secondLevelSource,
+      headers: {},
+    }),
+  });
+
+  const registryClient = initRegistryClient(httpClientStub);
 
   pipe(
-    registryClient.fetchPackage(pkg.specifier),
+    registryClient.traverseImports(topLevelUrl, []),
     assertTaskSuccess((r) =>
-      expectToEqual(r, {
-        originalUrl: pkg.indexUrl,
-        indexSource: CodeTexts.make(pkg.indexSource),
-        typedef: O.Some({
-          url: pkg.typedefUrl,
-          code: CodeTexts.make(pkg.typedefSource),
-          imports: [
-            {
-              url: importedUrl,
-              code: CodeTexts.make(importedSource),
-              imports: [],
-            },
-          ],
-        }),
-      }),
+      expectToEqual(r, [
+        {
+          url: topLevelUrl,
+          code: CodeTexts.make(topLevelSource),
+        },
+        {
+          url: firstLevelImportUrl,
+          code: CodeTexts.make(firstLevelSource),
+        },
+        {
+          url: secondLevelImportUrl,
+          code: CodeTexts.make(secondLevelSource),
+        },
+      ]),
+    ),
+  );
+});
+
+test('extracts imports from the code, avoiding circular dependencies', () => {
+  const secondLevelImportUrl = `second-level-import-url`;
+  const firstLevelImportUrl = `first-level-import-url`;
+
+  const secondLevelSource = `
+import from '${firstLevelImportUrl}';
+declare module 'second-level-import';
+`;
+
+  const firstLevelSource = `
+import from '${secondLevelImportUrl}';
+declare module 'first-level-import';
+`;
+
+  const topLevelUrl = 'top-level-url';
+  const topLevelSource = `
+import from '${firstLevelImportUrl}';
+declare module 'top-level';    
+`;
+
+  const httpClientStub = initHttpClientStub({
+    [topLevelUrl]: okOnce(`GET ${topLevelUrl}`, {
+      data: topLevelSource,
+      headers: {},
+    }),
+    [firstLevelImportUrl]: okOnce(`GET ${firstLevelImportUrl}`, {
+      data: firstLevelSource,
+      headers: {},
+    }),
+    [secondLevelImportUrl]: okOnce(`GET ${secondLevelImportUrl}`, {
+      data: secondLevelSource,
+      headers: {},
+    }),
+  });
+
+  const registryClient = initRegistryClient(httpClientStub);
+
+  pipe(
+    registryClient.traverseImports(topLevelUrl, []),
+    assertTaskSuccess((r) =>
+      expectToEqual(r, [
+        {
+          url: topLevelUrl,
+          code: CodeTexts.make(topLevelSource),
+        },
+        {
+          url: firstLevelImportUrl,
+          code: CodeTexts.make(firstLevelSource),
+        },
+        {
+          url: secondLevelImportUrl,
+          code: CodeTexts.make(secondLevelSource),
+        },
+      ]),
     ),
   );
 });
