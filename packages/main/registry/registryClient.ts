@@ -96,24 +96,18 @@ export function initRegistryClient(httpClient: HttpClient) {
           accAlreadyVisitedUrls: alreadyVisitedUrls.concat(resource.url),
         }),
         (accTask, importUrl) => {
-          const importedResourcesTask = pipe(
+          return pipe(
             accTask,
-            T.flatMap(({ accAlreadyVisitedUrls }) =>
-              traverseImports(importUrl, accAlreadyVisitedUrls),
+            T.bindTo('acc'),
+            T.bind('imports', ({ acc }) =>
+              traverseImports(importUrl, acc.accAlreadyVisitedUrls),
             ),
-          );
-
-          return T.zipWith(
-            importedResourcesTask,
-            accTask,
-            (importedResources, { newResources, accAlreadyVisitedUrls }) => {
-              return {
-                newResources: newResources.concat(importedResources),
-                accAlreadyVisitedUrls: accAlreadyVisitedUrls.concat(
-                  importedResources.map((r) => r.url),
-                ),
-              };
-            },
+            T.map(({ acc, imports }) => ({
+              newResources: acc.newResources.concat(imports),
+              accAlreadyVisitedUrls: acc.accAlreadyVisitedUrls.concat(
+                imports.map((r) => r.url),
+              ),
+            })),
           );
         },
       ),

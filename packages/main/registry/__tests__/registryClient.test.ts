@@ -173,6 +173,60 @@ declare module 'react';
   );
 });
 
+test('extracts imports from the code, even if multiple in the same file', () => {
+  const firstImportUrl = `first-import-url`;
+  const firstImportSource = `
+declare module 'first-import';
+`;
+  const secondImportUrl = `second-import-url`;
+  const secondImportSource = `
+declare module 'second-import';
+`;
+
+  const topLevelUrl = 'top-level-url';
+  const topLevelSource = `
+import '${firstImportUrl}';
+import '${secondImportUrl}';
+declare module 'react';    
+`;
+  const httpClientStub = initHttpClientStub({
+    [topLevelUrl]: okOnce(`GET ${topLevelUrl}`, {
+      data: topLevelSource,
+      headers: {},
+    }),
+    [firstImportUrl]: okOnce(`GET ${firstImportUrl}`, {
+      data: firstImportSource,
+      headers: {},
+    }),
+    [secondImportUrl]: okOnce(`GET ${secondImportUrl}`, {
+      data: secondImportSource,
+      headers: {},
+    }),
+  });
+
+  const registryClient = initRegistryClient(httpClientStub);
+
+  pipe(
+    registryClient.traverseImports(topLevelUrl, []),
+    assertTaskSuccess((r) =>
+      expectToEqual(r, [
+        {
+          url: topLevelUrl,
+          code: CodeTexts.make(topLevelSource),
+        },
+        {
+          url: firstImportUrl,
+          code: CodeTexts.make(firstImportSource),
+        },
+        {
+          url: secondImportUrl,
+          code: CodeTexts.make(secondImportSource),
+        },
+      ]),
+    ),
+  );
+});
+
 test('extracts imports from the code, avoiding circular dependencies', () => {
   const secondLevelImportUrl = `second-level-import-url`;
   const firstLevelImportUrl = `first-level-import-url`;
