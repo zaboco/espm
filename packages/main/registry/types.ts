@@ -6,24 +6,14 @@ export interface RegistryResource {
   code: CodeText;
 }
 
-export interface TopLevelResource extends RegistryResource {
+export interface TopLevelRegistryResource extends RegistryResource {
   imports: readonly RegistryResource[];
 }
-
-// export const Resources = {
-//   make<RR extends RegistryResource>({
-//     url,
-//     code,
-//     imports,
-//   }: RR): RegistryResource {
-//     return { url, code, imports };
-//   },
-// };
 
 export interface RegistryPackage {
   originalUrl: string;
   indexSource: CodeText;
-  typedef: Option<RegistryResource>;
+  typedef: Option<TopLevelRegistryResource>;
 }
 
 export const RegistryPackages = {

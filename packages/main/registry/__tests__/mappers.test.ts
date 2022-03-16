@@ -1,4 +1,4 @@
-import { Resource } from '#main/core/types';
+import { Resource, TopLevelResource } from '#main/core/types';
 import { toPackage } from '#main/registry/mappers';
 import { RegistryPackage } from '#main/registry/types';
 import { REGISTRY_BASE_URL } from '#main/registry/url';
@@ -36,9 +36,14 @@ function genValidFixtureWithTypedef() {
     name: 'react',
     version: '17.0.2',
   };
-  const typedef: Resource = {
+  const importedResource: Resource = {
+    path: '/v69/csstype@3.0.11/index.d.ts',
+    code: CodeTexts.make('whatever'),
+  };
+  const typedef: TopLevelResource = {
     path: '/v66/@types/react@17.0.33/index.d.ts',
     code: CodeTexts.make('whatever'),
+    imports: [importedResource],
   };
   const registryPkg: RegistryPackage = {
     indexSource: CodeTexts.make(
@@ -48,7 +53,12 @@ function genValidFixtureWithTypedef() {
     typedef: O.Some({
       url: `${REGISTRY_BASE_URL}${typedef.path}`,
       code: typedef.code,
-      imports: [],
+      imports: [
+        {
+          url: `${REGISTRY_BASE_URL}${importedResource.path}`,
+          code: importedResource.code,
+        },
+      ],
     }),
   };
 
@@ -67,9 +77,10 @@ function genValidFixtureWithoutTypedef() {
     version: '0.0.7',
   };
 
-  const typedef: Resource = {
+  const typedef: TopLevelResource = {
     path: `/generated/${identifier.name}@${identifier.version}/index.d.ts`,
     code: CodeTexts.make(`declare module '${identifier.name}';`),
+    imports: [],
   };
 
   const registryPkg: RegistryPackage = {

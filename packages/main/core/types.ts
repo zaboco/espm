@@ -3,10 +3,14 @@ import { CodeText } from '#main/shared/codeText';
 
 export interface Package {
   identifier: PackageIdentifier;
-  typedef: Resource;
+  typedef: TopLevelResource;
 }
 
 export interface Resource {
   path: string;
   code: CodeText;
+}
+
+export interface TopLevelResource extends Resource {
+  imports: readonly Resource[];
 }

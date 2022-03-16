@@ -1,5 +1,9 @@
-import { Package, Resource } from '#main/core/types';
-import { RegistryPackage, RegistryResource } from '#main/registry/types';
+import { Package, Resource, TopLevelResource } from '#main/core/types';
+import {
+  RegistryPackage,
+  RegistryResource,
+  TopLevelRegistryResource,
+} from '#main/registry/types';
 import { relativePathFromUrl } from '#main/registry/url';
 import { CodeText, CodeTexts } from '#main/shared/codeText';
 import {
@@ -8,7 +12,7 @@ import {
   packageIdentifierFromSpecifier,
 } from '#main/shared/packages';
 import { T, Task } from '#ts-belt-extra';
-import { A, O, Option, pipe, R, Result, S } from '@mobily/ts-belt';
+import { A, O, pipe, R, Result, S } from '@mobily/ts-belt';
 
 export function toPackage(registryPkg: RegistryPackage): Task<Package, string> {
   return pipe(
@@ -18,7 +22,7 @@ export function toPackage(registryPkg: RegistryPackage): Task<Package, string> {
       identifier,
       typedef: pipe(
         registryPkg.typedef,
-        toTypedef,
+        O.map(toTopLevelResource),
         O.getWithDefault(generateTypedefStub(identifier)),
       ),
     })),
@@ -26,20 +30,30 @@ export function toPackage(registryPkg: RegistryPackage): Task<Package, string> {
   );
 }
 
-function toTypedef(typedefOption: Option<RegistryResource>): Option<Resource> {
-  return pipe(
-    typedefOption,
-    O.map((typedef) => ({
-      code: typedef.code,
-      path: relativePathFromUrl(typedef.url),
-    })),
-  );
+function toTopLevelResource(
+  topLevelRegistryResource: TopLevelRegistryResource,
+): TopLevelResource {
+  return {
+    ...toResource(topLevelRegistryResource),
+    imports: topLevelRegistryResource.imports.map(toResource),
+  };
 }
 
-function generateTypedefStub({ name, version }: PackageIdentifier): Resource {
+function toResource(registryResource: RegistryResource): Resource {
+  return {
+    code: registryResource.code,
+    path: relativePathFromUrl(registryResource.url),
+  };
+}
+
+function generateTypedefStub({
+  name,
+  version,
+}: PackageIdentifier): TopLevelResource {
   return {
     path: `/generated/${name}@${version}/index.d.ts`,
     code: CodeTexts.make(`declare module '${name}';`),
+    imports: [],
   };
 }
 

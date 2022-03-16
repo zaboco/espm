@@ -10,7 +10,7 @@ import {
   RegistryPackage,
   RegistryPackages,
   RegistryResource,
-  TopLevelResource,
+  TopLevelRegistryResource,
 } from './types';
 
 export const TYPES_URL_HEADER = 'x-typescript-types';
@@ -37,7 +37,7 @@ export function initRegistryClient(httpClient: HttpClient) {
                 `[${packageSpecifier}] Types not found! Generating stub index.d.ts`,
               );
             }),
-            T.recover<Option<TopLevelResource>, string>(O.None),
+            T.recover<Option<TopLevelRegistryResource>, string>(O.None),
           ),
         ),
         T.map(RegistryPackages.make),
@@ -48,7 +48,7 @@ export function initRegistryClient(httpClient: HttpClient) {
 
   function buildTypedefResource(
     indexResponse: HttpResponse<string>,
-  ): Task<TopLevelResource, string> {
+  ): Task<TopLevelRegistryResource, string> {
     return pipe(
       indexResponse,
       getHeader(TYPES_URL_HEADER),
