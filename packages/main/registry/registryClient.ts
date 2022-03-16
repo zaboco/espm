@@ -32,7 +32,8 @@ export function initRegistryClient(httpClient: HttpClient) {
         T.bind('typedef', ({ indexResponse }) =>
           pipe(
             buildTypedefResource(indexResponse),
-            T.tapError(() => {
+            T.tapError((e) => {
+              logger.debug(`[${packageSpecifier}] Error fetching types: ${e}`);
               logger.warn(
                 `[${packageSpecifier}] Types not found! Generating stub index.d.ts`,
               );
