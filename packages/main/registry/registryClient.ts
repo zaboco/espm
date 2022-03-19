@@ -1,6 +1,6 @@
 import { HttpClient, HttpResponse } from '#interfaces/httpClient.api';
 import { logger } from '#logger/index';
-import { buildPackageIndexUrl } from '#main/registry/url';
+import { buildRegistryUrl } from '#main/registry/url';
 import { CodeText, CodeTexts } from '#main/shared/codeText';
 import { PackageSpecifier } from '#main/shared/packages';
 import { AX, pipeTask, T, Task } from '#ts-belt-extra';
@@ -21,7 +21,7 @@ export function initRegistryClient(httpClient: HttpClient) {
       packageSpecifier: PackageSpecifier,
     ): Task<RegistryPackage, string> {
       return pipe(
-        T.of<string, string>(buildPackageIndexUrl(packageSpecifier)),
+        T.of<string, string>(buildRegistryUrl(packageSpecifier)),
         T.bindTo('originalUrl'),
         T.bind('indexResponse', ({ originalUrl }) =>
           httpClient.get<string>(originalUrl),

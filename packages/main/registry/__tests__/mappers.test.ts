@@ -1,7 +1,7 @@
 import { Resource, TopLevelResource } from '#main/core/types';
 import { toPackage } from '#main/registry/mappers';
 import { RegistryPackage } from '#main/registry/types';
-import { REGISTRY_BASE_URL } from '#main/registry/url';
+import { buildRegistryUrl } from '#main/registry/url';
 import { CodeTexts } from '#main/shared/codeText';
 import { PackageIdentifier } from '#main/shared/packages';
 import { expectToEqual } from '#test-helpers/assertions';
@@ -37,11 +37,11 @@ function genValidFixtureWithTypedef() {
     version: '17.0.2',
   };
   const importedResource: Resource = {
-    path: '/v69/csstype@3.0.11/index.d.ts',
+    path: 'v69/csstype@3.0.11/index.d.ts',
     code: CodeTexts.make('whatever'),
   };
   const typedef: TopLevelResource = {
-    path: '/v66/@types/react@17.0.33/index.d.ts',
+    path: 'v66/@types/react@17.0.33/index.d.ts',
     code: CodeTexts.make('whatever'),
     imports: [importedResource],
   };
@@ -49,13 +49,13 @@ function genValidFixtureWithTypedef() {
     indexSource: CodeTexts.make(
       `/* esm.sh - ${identifier.name}@${identifier.version} */`,
     ),
-    originalUrl: `${REGISTRY_BASE_URL}/${identifier.name}`,
+    originalUrl: buildRegistryUrl(identifier.name),
     typedef: O.Some({
-      url: `${REGISTRY_BASE_URL}${typedef.path}`,
+      url: buildRegistryUrl(typedef.path),
       code: typedef.code,
       imports: [
         {
-          url: `${REGISTRY_BASE_URL}${importedResource.path}`,
+          url: buildRegistryUrl(importedResource.path),
           code: importedResource.code,
         },
       ],
@@ -87,7 +87,7 @@ function genValidFixtureWithoutTypedef() {
     indexSource: CodeTexts.make(
       `/* esm.sh - ${identifier.name}@${identifier.version} */`,
     ),
-    originalUrl: `${REGISTRY_BASE_URL}/${identifier.name}`,
+    originalUrl: buildRegistryUrl(identifier.name),
     typedef: O.None,
   };
 

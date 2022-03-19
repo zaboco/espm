@@ -42,11 +42,11 @@ test('it adds typedef files to deps, with alias', () => {
 function generatePkg() {
   const importedTypedef: Resource = {
     code: CodeTexts.make(''),
-    path: '/v69/csstype@3.0.11/index.d.ts',
+    path: 'v69/csstype@3.0.11/index.d.ts',
   };
   const typedef: TopLevelResource = {
     code: CodeTexts.make(''),
-    path: '/v66/@types/react@17.0.33/index.d.ts',
+    path: 'v66/@types/react@17.0.33/index.d.ts',
     imports: [importedTypedef],
   };
   const pkg: Package = {
