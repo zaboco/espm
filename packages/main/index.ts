@@ -1,10 +1,12 @@
 import { FsClient } from '#interfaces/fsClient.api';
 import { HttpClient } from '#interfaces/httpClient.api';
+import { logTask } from '#logger/logTask';
 import { initFsDriver } from '#main/fs-driver/fsDriver';
 import { packageToFsActions } from '#main/fs-driver/mappers';
 import { toPackage } from '#main/registry/mappers';
 import { initRegistryClient } from '#main/registry/registryClient';
 import { replaceImportUrls } from '#main/registry/replaceImportUrls';
+import { RegistryPackage } from '#main/registry/types';
 import { PackageSpecifier } from '#main/shared/packages';
 import { Command } from '#main/types';
 import { pipeTask, T, Task } from '#ts-belt-extra';
@@ -35,14 +37,16 @@ function buildCommands(services: Services) {
   const fsDriver = initFsDriver(services.fsClient);
   const registryClient = initRegistryClient(services.httpClient);
 
+  const processRegistryPkg = (pkg: RegistryPackage) =>
+    pipe(pkg, replaceImportUrls, toPackage, T.map(packageToFsActions));
+
   const addOne = (pkgSpecifier: PackageSpecifier): Task<unknown, string> =>
-    pipeTask(
-      T.of(pkgSpecifier),
+    pipe(
+      pkgSpecifier,
       registryClient.fetchPackage,
-      replaceImportUrls,
-      toPackage,
-      packageToFsActions,
-      fsDriver.performInParallel,
+      T.flatMap(processRegistryPkg),
+      T.flatMap(fsDriver.performInParallel),
+      logTask(`Add ${pkgSpecifier}`, { level: 'INFO' }),
     );
 
   return {

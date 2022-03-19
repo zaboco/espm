@@ -1,11 +1,11 @@
 import { T, Task } from '#ts-belt-extra';
-import { logger } from './index';
+import { logger, SpinnerOptions } from './index';
 
 export const logTask =
-  (message: string) =>
+  (message: string, options: SpinnerOptions) =>
   <R, E>(task: Task<R, E>): Task<R, E> =>
     T.make((rej, res) => {
-      const spinner = logger.spinner(message);
+      const spinner = logger.spinner(message, options);
       return T.fork<R, E>(
         (e) => {
           spinner.fail(String(e));

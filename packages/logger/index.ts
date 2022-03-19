@@ -4,7 +4,10 @@ import { performance } from 'node:perf_hooks';
 import Spinnies from 'spinnies';
 
 export interface Logger {
-  spinner(message: string): {
+  spinner(
+    message: string,
+    options: SpinnerOptions,
+  ): {
     succeed: () => void;
     fail: (message: string) => void;
   };
@@ -17,6 +20,10 @@ export interface Logger {
   setLevel(newLevel: LogLevel): void;
 }
 
+export interface SpinnerOptions {
+  level: SpinnerLogLevel;
+}
+
 interface LogOptions {
   level: LogLevel;
 }
@@ -24,10 +31,10 @@ interface LogOptions {
 type Color = 'white' | 'blue' | 'yellow' | 'red' | 'black';
 
 export type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
+type SpinnerLogLevel = Extract<LogLevel, 'DEBUG' | 'INFO'>;
 type LogThreshold = LogLevel | 'NONE';
 
 const DEFAULT_THRESHOLD_LEVEL = 'NONE';
-const SPINNER_LEVEL = 'DEBUG';
 
 export const logger = initLogger();
 
@@ -50,8 +57,8 @@ export function initLogger(
   let thresholdLevel = initialThresholdLevel;
 
   return {
-    spinner(message) {
-      if (!isLevelAboveThreshold(SPINNER_LEVEL, thresholdLevel)) {
+    spinner(message, { level }) {
+      if (!isLevelAboveThreshold(level, thresholdLevel)) {
         return {
           succeed() {},
           fail() {},
@@ -59,19 +66,19 @@ export function initLogger(
       }
       const spinnerId = uuid(`spinner-${message}`);
       spinnies.add(spinnerId, {
-        text: formatMessage(message, SPINNER_LEVEL),
-        color: getTextColor(SPINNER_LEVEL),
+        text: formatMessage(message, level),
+        color: 'black',
       });
 
       return {
         succeed() {
           spinnies.succeed(spinnerId, {
-            succeedColor: 'black',
+            succeedColor: getTextColor(level),
           });
         },
         fail(message: string) {
           spinnies.fail(spinnerId, {
-            text: formatMessage(message, SPINNER_LEVEL),
+            text: formatMessage(message, level),
           });
         },
       };

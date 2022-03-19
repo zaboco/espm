@@ -16,7 +16,7 @@ export const httpieClient: HttpClient = {
           );
         },
       ),
-      logTask(`GET ${url}`),
+      logTask(`GET ${url}`, { level: 'DEBUG' }),
     );
   },
 };

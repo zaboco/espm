@@ -19,12 +19,14 @@ export function initFsDriver(fs: FsClient) {
       case 'writeFile':
         return pipe(
           fs.writeFile(action.path, action.contents),
-          logTask(`[writeFile] ${action.path}`),
+          logTask(`[writeFile] ${action.path}`, { level: 'DEBUG' }),
         );
       case 'symlink':
         return pipe(
           fs.symlink(action.to, action.from),
-          logTask(`[symlink] ${action.from} -> ${action.to}`),
+          logTask(`[symlink] ${action.from} -> ${action.to}`, {
+            level: 'DEBUG',
+          }),
         );
     }
   }
