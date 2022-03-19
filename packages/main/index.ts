@@ -4,6 +4,7 @@ import { initFsDriver } from '#main/fs-driver/fsDriver';
 import { packageToFsActions } from '#main/fs-driver/mappers';
 import { toPackage } from '#main/registry/mappers';
 import { initRegistryClient } from '#main/registry/registryClient';
+import { replaceImportUrls } from '#main/registry/replaceImportUrls';
 import { PackageSpecifier } from '#main/shared/packages';
 import { Command } from '#main/types';
 import { pipeTask, T, Task } from '#ts-belt-extra';
@@ -38,6 +39,7 @@ function buildCommands(services: Services) {
     pipeTask(
       T.of(pkgSpecifier),
       registryClient.fetchPackage,
+      replaceImportUrls,
       toPackage,
       packageToFsActions,
       fsDriver.performInParallel,

@@ -2,10 +2,10 @@ import { HttpClient, HttpResponse } from '#interfaces/httpClient.api';
 import { logger } from '#logger/index';
 import { buildRegistryUrl } from '#main/registry/url';
 import { CodeText, CodeTexts } from '#main/shared/codeText';
+import { extractImportPaths } from '#main/shared/imports';
 import { PackageSpecifier } from '#main/shared/packages';
 import { AX, pipeTask, T, Task } from '#ts-belt-extra';
 import { A, D, O, Option, pipe } from '@mobily/ts-belt';
-import * as esModuleLexer from 'es-module-lexer';
 import {
   RegistryPackage,
   RegistryPackages,
@@ -84,7 +84,7 @@ export function initRegistryClient(httpClient: HttpClient) {
   ): Task<readonly RegistryResource[], string> {
     return pipe(
       resource.code,
-      extractImports,
+      extractImportPaths,
       A.reduce(
         T.of<
           {
@@ -122,16 +122,6 @@ export function initRegistryClient(httpClient: HttpClient) {
       url: url,
     }));
   }
-}
-
-function extractImports(code: CodeText): readonly string[] {
-  return pipe(
-    code,
-    esModuleLexer.parse,
-    ([imports]) => imports,
-    A.map(D.getUnsafe('n')),
-    AX.rejectNullables,
-  );
 }
 
 const getCodeData = (response: HttpResponse<string>): Task<CodeText, string> =>
