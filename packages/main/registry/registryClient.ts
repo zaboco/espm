@@ -85,6 +85,7 @@ export function initRegistryClient(httpClient: HttpClient) {
     return pipe(
       resource.code,
       extractImportPaths,
+      A.map(buildFullUrlPath(resource.url)),
       A.reduce(
         T.of<
           {
@@ -123,6 +124,11 @@ export function initRegistryClient(httpClient: HttpClient) {
     }));
   }
 }
+
+const buildFullUrlPath =
+  (baseUrl: string) =>
+  (path: string): string =>
+    pipe(new URL(path, baseUrl), (url) => url.href);
 
 const getCodeData = (response: HttpResponse<string>): Task<CodeText, string> =>
   pipe(

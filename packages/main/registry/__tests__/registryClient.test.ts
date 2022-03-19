@@ -46,6 +46,8 @@ function generatePackageFixture(
   };
 }
 
+const topLevelUrl = buildRegistryUrl('react');
+
 test.before(() => esModuleLexer.init);
 
 test('returns package definition for valid package', () => {
@@ -86,7 +88,6 @@ test('extracts imports from the code', () => {
   const importedUrl = `https://cdn.esm.sh/v66/csstype@3.0.10/index.d.ts`;
   const importedSource = "declare module 'css';";
 
-  const topLevelUrl = 'top-level-url';
   const topLevelSource = `
 import * as CSS from '${importedUrl}';
 declare module 'react';    
@@ -119,18 +120,17 @@ declare module 'react';
 });
 
 test('extracts imports from the code, even if nested', () => {
-  const secondLevelImportUrl = `second-level-import-url`;
+  const secondLevelImportUrl = buildRegistryUrl(`second-level-import-url`);
   const secondLevelSource = `
 declare module 'second-level-import';
 `;
 
-  const firstLevelImportUrl = `first-level-import-url`;
+  const firstLevelImportUrl = buildRegistryUrl(`first-level-import-url`);
   const firstLevelSource = `
 import from '${secondLevelImportUrl}';
 declare module 'first-level-import';
 `;
 
-  const topLevelUrl = 'top-level-url';
   const topLevelSource = `
 import * as CSS from '${firstLevelImportUrl}';
 declare module 'react';    
@@ -174,16 +174,15 @@ declare module 'react';
 });
 
 test('extracts imports from the code, even if multiple in the same file', () => {
-  const firstImportUrl = `first-import-url`;
+  const firstImportUrl = buildRegistryUrl(`first-import-url`);
   const firstImportSource = `
 declare module 'first-import';
 `;
-  const secondImportUrl = `second-import-url`;
+  const secondImportUrl = buildRegistryUrl(`second-import-url`);
   const secondImportSource = `
 declare module 'second-import';
 `;
 
-  const topLevelUrl = 'top-level-url';
   const topLevelSource = `
 import '${firstImportUrl}';
 import '${secondImportUrl}';
@@ -228,8 +227,8 @@ declare module 'react';
 });
 
 test('extracts imports from the code, avoiding circular dependencies', () => {
-  const secondLevelImportUrl = `second-level-import-url`;
-  const firstLevelImportUrl = `first-level-import-url`;
+  const secondLevelImportUrl = buildRegistryUrl(`second-level-import-url`);
+  const firstLevelImportUrl = buildRegistryUrl(`first-level-import-url`);
 
   const secondLevelSource = `
 import from '${firstLevelImportUrl}';
@@ -241,7 +240,6 @@ import from '${secondLevelImportUrl}';
 declare module 'first-level-import';
 `;
 
-  const topLevelUrl = 'top-level-url';
   const topLevelSource = `
 import from '${firstLevelImportUrl}';
 declare module 'top-level';    
@@ -280,6 +278,52 @@ declare module 'top-level';
           url: secondLevelImportUrl,
           code: CodeTexts.make(secondLevelSource),
         },
+      ]),
+    ),
+  );
+});
+
+test('extracts imports from the code, even if not full URLs', () => {
+  const relativeImportPath = `relative.d.ts`;
+  const relativeImportUrl = buildRegistryUrl(relativeImportPath);
+  const relativeImportSource = "declare module 'relative';";
+
+  const absoluteImportPath = `absolute.d.ts`;
+  const absoluteImportUrl = buildRegistryUrl(absoluteImportPath);
+  const absoluteImportSource = "declare module 'absolute';";
+
+  const topLevelSource = `
+import './${relativeImportPath}';
+import '/${absoluteImportPath}';
+declare module 'top-level';    
+`;
+  const httpClientStub = initHttpClientStub({
+    [topLevelUrl]: okOnce(`GET ${topLevelUrl}`, {
+      data: topLevelSource,
+      headers: {},
+    }),
+    [absoluteImportUrl]: okOnce(`GET ${absoluteImportUrl}`, {
+      data: absoluteImportSource,
+      headers: {},
+    }),
+    [relativeImportUrl]: okOnce(`GET ${relativeImportUrl}`, {
+      data: relativeImportSource,
+      headers: {},
+    }),
+  });
+
+  const registryClient = initRegistryClient(httpClientStub);
+
+  pipe(
+    registryClient.traverseImports(topLevelUrl, []),
+    assertTaskSuccess((r) =>
+      expectToEqual(r, [
+        {
+          url: topLevelUrl,
+          code: CodeTexts.make(topLevelSource),
+        },
+        { url: relativeImportUrl, code: CodeTexts.make(relativeImportSource) },
+        { url: absoluteImportUrl, code: CodeTexts.make(absoluteImportSource) },
       ]),
     ),
   );
