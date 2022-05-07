@@ -18,10 +18,11 @@ const test = suite('replaceImportPaths');
 test.before(() => esModuleLexer.init);
 
 test('it replaces code import paths with relative paths', () => {
-  const relativePath = `prop-types@15.7.4/index.d.ts`;
+  const baseRelativePath = `prop-types@15.7.4/index`;
+  const relativePathWithDtsExtension = `${baseRelativePath}.d.ts`;
   const importedTypedef: RegistryResource = {
     code: CodeTexts.make('whatever'),
-    url: buildRegistryUrl(relativePath),
+    url: buildRegistryUrl(relativePathWithDtsExtension),
   };
   const typedef: TopLevelRegistryResource = {
     code: CodeTexts.make(`
@@ -38,7 +39,7 @@ import '${importedTypedef.url}';
   };
 
   const expectedTypedefCode = CodeTexts.make(`
-import '../${relativePath}';
+import '../${baseRelativePath}';
 `);
 
   expectToEqual(replaceImportUrls(pkg), {
@@ -51,8 +52,8 @@ import '../${relativePath}';
 });
 
 test('replaceImportPathsInCode replaces absolute import paths with relative ones', () => {
-  const import1Path = 'css/index.d.ts';
-  const import2Path = 'foo/index.d.ts';
+  const import1Path = 'css/index';
+  const import2Path = 'foo/index';
   const indexUrl = buildRegistryUrl('react/index.ts');
   const import1Url = buildRegistryUrl(import1Path);
   const import2Url = buildRegistryUrl(import2Path);

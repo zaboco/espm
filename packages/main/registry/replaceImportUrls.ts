@@ -33,7 +33,8 @@ export function replaceImportPathsInCode(
 
   for (const imp of extractImports(srcCode)) {
     const relativePath = getRelativeUrlPath(srcUrl, imp.path);
-    s.overwrite(imp.startIndex, imp.endIndex, relativePath);
+    const pathWithoutDtsExtension = relativePath.replace(/\.d\.ts$/, '');
+    s.overwrite(imp.startIndex, imp.endIndex, pathWithoutDtsExtension);
   }
 
   return CodeTexts.make(s.toString());
