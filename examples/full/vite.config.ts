@@ -5,12 +5,11 @@ const deps = {
   react: `react@17.0.2`,
   reactDom: `react-dom@17.0.2`,
   uvu: `uvu@0.5.3`,
-  rtl: `@testing-library/react@13.2.0`,
+  rtl: `@testing-library/react@12.1.5`,
 };
 
 const testConfig = defineConfig({
   plugins: [reactPlugin({ jsxRuntime: 'classic', fastRefresh: false })],
-  root: 'test',
   resolve: {
     alias: {
       react: `https://esm.sh/${deps.react}?dev`,

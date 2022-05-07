@@ -8,6 +8,6 @@
   "scripts": {
     "start": "vite --open",
     "build": "vite build",
-    "test": "NODE_ENV=testing vite --port 3001 --open"
+    "test": "NODE_ENV=testing vite --port 3001 --open /test/"
   }
 }

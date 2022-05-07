@@ -5,8 +5,8 @@ export function App() {
 
   return (
     <div>
-      <h1>React App {value}</h1>
-      <button onClick={() => setValue((p) => p + 1)}>+</button>
+      <h1>Current value {value}</h1>
+      <button onClick={() => setValue((p) => p + 1)}>Increment</button>
     </div>
   );
 }
