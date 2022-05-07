@@ -8,7 +8,7 @@ const test = suite('App');
 
 test('renders the App', () => {
   render(<App />);
-  assert.equal(screen.getByRole('heading').textContent, 'React App');
+  assert.equal(screen.getByRole('heading').textContent, 'React App!');
 });
 
 test.run();
