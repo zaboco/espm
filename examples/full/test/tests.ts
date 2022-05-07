@@ -7,6 +7,7 @@ async function runTests() {
 
   await import('./add.test');
   await import('./multiply.test');
+  await import('./App.test');
 }
 
 if (import.meta.hot) {

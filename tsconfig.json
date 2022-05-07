@@ -28,5 +28,5 @@
       "#test-helpers/*": ["packages/test-helpers/*"]
     }
   },
-  "exclude": ["examples", "node_modules"]
+  "include": ["packages"]
 }
