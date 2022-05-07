@@ -39,11 +39,12 @@ function toTopLevelResource(
   return {
     ...resource,
     imports: topLevelRegistryResource.imports.map(toResource),
-    indexCode: CodeTexts.make(
-      `export * from '${path.relative(
-        `${identifier.name}`,
-        `.deps/${resource.path.replace(/\.d\.ts$/, '')}`,
-      )}'`,
+    packageJson: CodeTexts.make(
+      `{
+  "name": "${identifier.name}",
+  "version": "${identifier.version}",
+  "types": "${path.relative(`${identifier.name}`, `.deps/${resource.path}`)}"
+}`,
     ),
   };
 }
@@ -62,11 +63,12 @@ function generateTypedefStub({
   return {
     path: `/generated/${name}@${version}/index.d.ts`,
     code: CodeTexts.make(`declare module '${name}';`),
-    indexCode: CodeTexts.make(
-      `export * from '${path.relative(
-        `${name}`,
-        `.deps/generated/${name}@${version}/index`,
-      )}'`,
+    packageJson: CodeTexts.make(
+      `{
+  "name": "${name}",
+  "version": "${version}",
+  "types": "../.deps/generated/${name}@${version}/index"
+}`,
     ),
     imports: [],
   };

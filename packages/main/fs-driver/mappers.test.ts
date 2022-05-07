@@ -1,7 +1,7 @@
 import { Package, Resource, TopLevelResource } from '#main/core/types';
 import {
   buildDepPath,
-  buildTypedefPath,
+  buildPackageJsonPath,
   packageToFsActions,
 } from '#main/fs-driver/mappers';
 import { CodeTexts } from '#main/shared/codeText';
@@ -30,8 +30,8 @@ test('it adds typedef files to deps, with alias', () => {
           },
           {
             type: 'writeFile',
-            path: buildTypedefPath(pkg.identifier),
-            contents: typedef.indexCode,
+            path: buildPackageJsonPath(pkg.identifier),
+            contents: typedef.packageJson,
           },
         ],
       },
@@ -44,12 +44,16 @@ function generatePkg() {
     code: CodeTexts.make(''),
     path: 'v69/csstype@3.0.11/index.d.ts',
   };
-  const baseTypedefPath = `v69/@types/react@17.0.33/index`;
+  const typedefPath = `v69/@types/react@17.0.33/index.d.ts`;
   const typedef: TopLevelResource = {
     code: CodeTexts.make(''),
-    path: `${baseTypedefPath}.d.ts`,
+    path: `${typedefPath}`,
     imports: [importedTypedef],
-    indexCode: CodeTexts.make(`export * from '../../${baseTypedefPath}'`),
+    packageJson: CodeTexts.make(`{
+  "name": "react",
+  "version": "18.0.9",
+  "types": "../../${typedefPath}"
+}`),
   };
   const pkg: Package = {
     identifier: { name: 'react', version: '17.0.2' },

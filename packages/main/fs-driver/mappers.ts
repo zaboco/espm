@@ -26,8 +26,8 @@ export function packageToFsActions(pkg: Package): FsAction[] {
 function typedefIndexWriteAction(pkg: Package): FsAction {
   return {
     type: 'writeFile',
-    path: buildTypedefPath(pkg.identifier),
-    contents: pkg.typedef.indexCode,
+    path: buildPackageJsonPath(pkg.identifier),
+    contents: pkg.typedef.packageJson,
   };
 }
 
@@ -40,6 +40,6 @@ export function buildDepPath(filePath: string) {
   return path.join(MODULES_DIRECTORY_NAME, DEPS_DIRECTORY_NAME, filePath);
 }
 
-export function buildTypedefPath(identifier: PackageIdentifier) {
-  return path.join(MODULES_DIRECTORY_NAME, identifier.name, 'index.d.ts');
+export function buildPackageJsonPath(identifier: PackageIdentifier) {
+  return path.join(MODULES_DIRECTORY_NAME, identifier.name, 'package.json');
 }
