@@ -12,5 +12,6 @@ export interface Resource {
 }
 
 export interface TopLevelResource extends Resource {
+  indexCode: CodeText;
   imports: readonly Resource[];
 }

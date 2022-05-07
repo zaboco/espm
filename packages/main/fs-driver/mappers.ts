@@ -17,17 +17,17 @@ export function packageToFsActions(pkg: Package): FsAction[] {
       actions: [
         writeMainTypedef,
         ...writeImportedTypedefs,
-        typedefSymlinkAction(pkg),
+        typedefIndexWriteAction(pkg),
       ],
     },
   ];
 }
 
-function typedefSymlinkAction(pkg: Package): FsAction {
+function typedefIndexWriteAction(pkg: Package): FsAction {
   return {
-    type: 'symlink',
-    from: buildTypedefPath(pkg.identifier),
-    to: buildDepPath(pkg.typedef.path),
+    type: 'writeFile',
+    path: buildTypedefPath(pkg.identifier),
+    contents: pkg.typedef.indexCode,
   };
 }
 

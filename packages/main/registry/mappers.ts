@@ -13,6 +13,7 @@ import {
 } from '#main/shared/packages';
 import { T, Task } from '#ts-belt-extra';
 import { A, O, pipe, R, Result, S } from '@mobily/ts-belt';
+import path from 'node:path';
 
 export function toPackage(registryPkg: RegistryPackage): Task<Package, string> {
   return pipe(
@@ -22,7 +23,7 @@ export function toPackage(registryPkg: RegistryPackage): Task<Package, string> {
       identifier,
       typedef: pipe(
         registryPkg.typedef,
-        O.map(toTopLevelResource),
+        O.map((res) => toTopLevelResource(res, identifier)),
         O.getWithDefault(generateTypedefStub(identifier)),
       ),
     })),
@@ -32,10 +33,18 @@ export function toPackage(registryPkg: RegistryPackage): Task<Package, string> {
 
 function toTopLevelResource(
   topLevelRegistryResource: TopLevelRegistryResource,
+  identifier: PackageIdentifier,
 ): TopLevelResource {
+  const resource = toResource(topLevelRegistryResource);
   return {
-    ...toResource(topLevelRegistryResource),
+    ...resource,
     imports: topLevelRegistryResource.imports.map(toResource),
+    indexCode: CodeTexts.make(
+      `export * from '${path.relative(
+        `${identifier.name}`,
+        `.deps/${resource.path.replace(/\.d\.ts$/, '')}`,
+      )}'`,
+    ),
   };
 }
 
@@ -53,6 +62,12 @@ function generateTypedefStub({
   return {
     path: `/generated/${name}@${version}/index.d.ts`,
     code: CodeTexts.make(`declare module '${name}';`),
+    indexCode: CodeTexts.make(
+      `export * from '${path.relative(
+        `${name}`,
+        `.deps/generated/${name}@${version}/index`,
+      )}'`,
+    ),
     imports: [],
   };
 }

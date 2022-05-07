@@ -29,9 +29,9 @@ test('it adds typedef files to deps, with alias', () => {
             contents: importedTypedef.code,
           },
           {
-            type: 'symlink',
-            from: buildTypedefPath(pkg.identifier),
-            to: buildDepPath(typedef.path),
+            type: 'writeFile',
+            path: buildTypedefPath(pkg.identifier),
+            contents: typedef.indexCode,
           },
         ],
       },
@@ -44,10 +44,12 @@ function generatePkg() {
     code: CodeTexts.make(''),
     path: 'v69/csstype@3.0.11/index.d.ts',
   };
+  const baseTypedefPath = `v69/@types/react@17.0.33/index`;
   const typedef: TopLevelResource = {
     code: CodeTexts.make(''),
-    path: 'v66/@types/react@17.0.33/index.d.ts',
+    path: `${baseTypedefPath}.d.ts`,
     imports: [importedTypedef],
+    indexCode: CodeTexts.make(`export * from '../../${baseTypedefPath}'`),
   };
   const pkg: Package = {
     identifier: { name: 'react', version: '17.0.2' },

@@ -44,6 +44,9 @@ function genValidFixtureWithTypedef() {
     path: 'v66/@types/react@17.0.33/index.d.ts',
     code: CodeTexts.make('whatever'),
     imports: [importedResource],
+    indexCode: CodeTexts.make(
+      `export * from '../.deps/v66/@types/react@17.0.33/index'`,
+    ),
   };
   const registryPkg: RegistryPackage = {
     indexSource: CodeTexts.make(
@@ -80,6 +83,9 @@ function genValidFixtureWithoutTypedef() {
   const typedef: TopLevelResource = {
     path: `/generated/${identifier.name}@${identifier.version}/index.d.ts`,
     code: CodeTexts.make(`declare module '${identifier.name}';`),
+    indexCode: CodeTexts.make(
+      `export * from '../.deps/generated/${identifier.name}@${identifier.version}/index'`,
+    ),
     imports: [],
   };
 
