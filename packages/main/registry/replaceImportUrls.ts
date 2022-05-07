@@ -43,8 +43,19 @@ export function getRelativeUrlPath(
   fromUrlPath: string,
   toUrlPath: string,
 ): string {
-  const fromUrl = new URL(fromUrlPath);
-  const toUrl = new URL(toUrlPath);
+  try {
+    const fromUrl = saferUrl(fromUrlPath);
+    const toUrl = saferUrl(toUrlPath);
+    return path.relative(path.dirname(fromUrl.pathname), toUrl.pathname);
+  } catch {
+    return toUrlPath;
+  }
+}
 
-  return path.relative(path.dirname(fromUrl.pathname), toUrl.pathname);
+function saferUrl(urlString: string): URL {
+  try {
+    return new URL(urlString);
+  } catch (e) {
+    throw Error(`invalid URL: ${urlString}`);
+  }
 }
