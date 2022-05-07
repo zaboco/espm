@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "devDependencies": {
+    "@vitejs/plugin-react": "1.3.2",
+    "typescript": "4.6.4",
+    "vite": "2.9.8"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "vite build"
+  }
+}
