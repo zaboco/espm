@@ -19,8 +19,10 @@
     "skipLibCheck": true,
     "noEmit": true,
     "baseUrl": ".",
+    "types": ["vite/client"],
     "paths": {
       "*": ["es-modules/*"]
     }
-  }
+  },
+  "include": ["src", "test", "typings"]
 }
