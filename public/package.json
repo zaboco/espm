@@ -1,0 +1,25 @@
+{
+  "name": "@zaboco/espm",
+  "version": "0.1.1",
+  "description": "ES Package Manager",
+  "scripts": {
+    "prepublishOnly": "sh pre-publish.sh"
+  },
+  "files": [
+    "package.json",
+    "README.md",
+    "cli.cjs"
+  ],
+  "keywords": [
+    "ES modules",
+    "Package manager",
+    "Typescript"
+  ],
+  "author": "zaboco@gmail.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zaboco/espm"
+  },
+  "license": "MIT",
+  "bin": "cli.cjs"
+}

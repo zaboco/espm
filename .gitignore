@@ -2,6 +2,8 @@ node_modules/
 es-modules/
 tsconfig.tsbuildinfo
 dist/
+public/cli.cjs
+public/README.md
 out/
 .cache
 /es-modules.json
