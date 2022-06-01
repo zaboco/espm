@@ -1,7 +1,7 @@
 import { PackageSpecifier } from '#main/shared/packages';
 import { pipe, S } from '@mobily/ts-belt';
 
-const REGISTRY_BASE_URL = `https://cdn.esm.sh/`;
+const REGISTRY_BASE_URL = `https://esm.sh/`;
 
 export function buildRegistryUrl(packageSpecifier: PackageSpecifier): string {
   return `${REGISTRY_BASE_URL}${packageSpecifier}`;

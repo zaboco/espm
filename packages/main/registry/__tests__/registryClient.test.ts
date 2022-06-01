@@ -85,7 +85,7 @@ test('returns package definition for valid package', () => {
 });
 
 test('extracts imports from the code', () => {
-  const importedUrl = `https://cdn.esm.sh/v66/csstype@3.0.10/index.d.ts`;
+  const importedUrl = `https://esm.sh/v66/csstype@3.0.10/index.d.ts`;
   const importedSource = "declare module 'css';";
 
   const topLevelSource = `
