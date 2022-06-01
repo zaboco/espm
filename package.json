@@ -2,16 +2,22 @@
   "name": "espm",
   "version": "0.1.0",
   "description": "ES Package Manager",
-  "main": "index.js",
   "scripts": {
     "test": "uvu -r esbuild-runner/register -C packages",
     "test:watch": "FORCE_COLOR=1 watchlist -e packages -- npm test",
     "tw": "FORCE_COLOR=1 watchlist -e packages -- esr",
-    "twd": "FORCE_COLOR=1 watchlist -e packages -- uvu -r esbuild-runner/register -C"
+    "twd": "FORCE_COLOR=1 watchlist -e packages -- uvu -r esbuild-runner/register -C",
+    "prepublishOnly": "esbuild --outfile=dist/cli.cjs --platform=node --bundle --minify --format=cjs packages/cli/index.ts"
   },
+  "files": [
+    "package.json",
+    "README.md",
+    "dist/cli.cjs"
+  ],
   "keywords": [],
   "author": "zaboco@gmail.com",
   "license": "MIT",
+  "bin": "dist/cli.cjs",
   "devDependencies": {
     "@types/node": "16.11.22",
     "esbuild-runner": "2.2.1",
