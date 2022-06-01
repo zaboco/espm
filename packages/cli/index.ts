@@ -7,7 +7,7 @@ import { nodeFsClient, httpieClient } from '#services';
 import { GX, T } from '#ts-belt-extra';
 import { A, pipe, R, Result } from '@mobily/ts-belt';
 
-logger.setLevel('DEBUG');
+logger.setLevel('INFO');
 main(process.argv.slice(2));
 
 function main(programArgs: ReadonlyArray<string>) {
