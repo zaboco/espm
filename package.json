@@ -1,5 +1,5 @@
 {
-  "name": "espm",
+  "name": "@zaboco/espm",
   "version": "0.1.0",
   "description": "ES Package Manager",
   "scripts": {
