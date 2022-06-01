@@ -7,7 +7,7 @@
     "test:watch": "FORCE_COLOR=1 watchlist -e packages -- npm test",
     "tw": "FORCE_COLOR=1 watchlist -e packages -- esr",
     "twd": "FORCE_COLOR=1 watchlist -e packages -- uvu -r esbuild-runner/register -C",
-    "prepublishOnly": "esbuild --outfile=dist/cli.cjs --platform=node --bundle --minify --format=cjs packages/cli/index.ts"
+    "prepublishOnly": "esbuild --outfile=dist/cli.cjs --platform=node --bundle --format=cjs packages/cli/index.ts"
   },
   "files": [
     "package.json",
