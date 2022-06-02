@@ -6,6 +6,7 @@ const deps = {
   reactDom: `react-dom@17.0.2`,
   uvu: `uvu@0.5.3`,
   rtl: `@testing-library/react@12.1.5`,
+  chai: `chai@4.3.6`,
 };
 
 const testConfig = defineConfig({
@@ -14,7 +15,7 @@ const testConfig = defineConfig({
     alias: {
       react: `https://esm.sh/${deps.react}?dev`,
       'react-dom': `https://esm.sh/${deps.reactDom}?dev`,
-      'uvu/assert': `https://esm.sh/${deps.uvu}/assert?dev`,
+      chai: `https://esm.sh/${deps.chai}?dev`,
       uvu: `https://esm.sh/${deps.uvu}?dev`,
       '@testing-library/react': `https://esm.sh/${deps.rtl}?deps=${deps.react},${deps.reactDom}&dev`,
     },
