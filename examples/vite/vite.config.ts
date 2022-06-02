@@ -35,6 +35,8 @@ const devConfig = defineConfig({
 
 const prodConfig = defineConfig({
   root: 'src',
+  plugins: [reactPlugin()],
+  build: { outDir: '../dist', minify: false, polyfillModulePreload: false },
   resolve: {
     alias: {
       react: `https://esm.sh/${deps.react}`,
