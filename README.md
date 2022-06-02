@@ -35,3 +35,4 @@ espm add <package>[@version]
 ## Known issues
 - Type reference paths are ignored `/// <reference path="./foo.d.ts" />`. In this case `./foo.d.ts` is not downloaded from the CDN
 - TS `namespace` syntax is not supported. For example, `espm add preact` would fail. 
+- Scoped packages do not work well. E.g. `espm add uvu/assert` will not work as intended.
