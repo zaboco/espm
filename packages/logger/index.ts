@@ -38,6 +38,15 @@ const DEFAULT_THRESHOLD_LEVEL = 'NONE';
 
 export const logger = initLogger();
 
+export function logLevelFromString(logLevelAsString: string): LogLevel {
+  return isLogLevel(logLevelAsString) ? logLevelAsString : 'INFO';
+}
+
+function isLogLevel(logLevelAsString: string): logLevelAsString is LogLevel {
+  const allLevels = ['DEBUG', 'INFO', 'WARN', 'ERROR'];
+  return allLevels.includes(logLevelAsString);
+}
+
 function isLevelAboveThreshold(level: LogLevel, thresholdLevel: LogThreshold) {
   const levelScores: Record<LogThreshold, number> = {
     DEBUG: 0,
@@ -46,7 +55,6 @@ function isLevelAboveThreshold(level: LogLevel, thresholdLevel: LogThreshold) {
     ERROR: 3,
     NONE: 4,
   };
-
   return levelScores[level] >= levelScores[thresholdLevel];
 }
 
@@ -117,13 +125,13 @@ export function initLogger(
 }
 
 function getTextColor(level: LogLevel): Color {
-  const colors: Record<LogLevel, Color> = {
+  const colorsByLevel: Record<LogLevel, Color> = {
     DEBUG: 'black',
     INFO: 'blue',
     WARN: 'yellow',
     ERROR: 'red',
   };
-  return colors[level];
+  return colorsByLevel[level];
 }
 
 function formatMessage(message: string, level: LogLevel): string {
