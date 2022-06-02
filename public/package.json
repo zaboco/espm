@@ -1,6 +1,6 @@
 {
   "name": "@zaboco/espm",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ES Package Manager",
   "scripts": {
     "prepublishOnly": "sh pre-publish.sh"
